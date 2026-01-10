@@ -17,3 +17,4 @@ python-dotenv
 requests
 tf-keras
 PyPDF2
+google-generativeai
