@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, Paperclip, StopCircle, Volume2, VolumeX, User, Sparkles, Trash2, Activity } from 'lucide-react';
+import { Send, Mic, Paperclip, Volume2, VolumeX, User, Trash2 } from 'lucide-react';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 import VoiceAssistantButton from './VoiceAssistantButton';
 import VoiceWaveform from './VoiceWaveform';
@@ -8,12 +8,22 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   const [input, setInput] = useState('');
   const [reportHistory, setReportHistory] = useState("");
 
+  // 🕒 Time-based Greeting State
+  const [greeting, setGreeting] = useState("Good Morning");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good Morning");
+    else if (hour < 17) setGreeting("Good Afternoon");
+    else setGreeting("Good Evening");
+  }, []);
+
   // 🎙️ Voice Recording States
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [isMuted, setIsMuted] = useState(false); // 🔇 New Mute State
+  const [isMuted, setIsMuted] = useState(false); 
 
-  // ⚖️ ROTATING RIGHTS LOGIC (Added Here)
+  // ⚖️ ROTATING RIGHTS LOGIC
   const [rightIndex, setRightIndex] = useState(0);
   const rights = [
     "Right to Information (RTI) 📄",
@@ -28,22 +38,19 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   useEffect(() => {
     const interval = setInterval(() => {
       setRightIndex((prev) => (prev + 1) % rights.length);
-    }, 2000); // Change every 2 seconds
+    }, 2000); 
     return () => clearInterval(interval);
   }, []);
 
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
-
   const bottomRef = useRef(null);
 
   // 🤖 Voice Assistant Integration
   const handleVoiceCommand = (command) => {
     switch (command.type) {
-      case 'stop':
-        // Voice assistant will stop automatically
-        break;
+      case 'stop': break;
       case 'clear':
         setMessages([]);
         setReportHistory('');
@@ -52,12 +59,10 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       case 'query':
         if (command.text) {
           setInput(command.text);
-          // Auto-send after a brief delay
           setTimeout(() => handleSend(command.text), 500);
         }
         break;
-      default:
-        break;
+      default: break;
     }
   };
 
@@ -67,81 +72,51 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading, isRecording]);
 
-  // 🔊 Auto-speak AI responses when voice assistant is enabled
+  // 🔊 Auto-speak AI responses
   useEffect(() => {
     if (!voiceAssistantEnabled) return;
-
-    // Get the last message
     const lastMessage = messages[messages.length - 1];
-
-    // If it's an AI message, speak it (but not while loading)
     if (lastMessage && lastMessage.sender === 'ai' && lastMessage.text && !loading) {
-      // Small delay to ensure message is rendered
       setTimeout(() => {
-        speakText(lastMessage.text, true); // autoPlay = true
+        speakText(lastMessage.text, true);
       }, 300);
     }
   }, [messages, voiceAssistantEnabled, loading]);
 
-  // 🔊 Text-to-Speech with Language Support (Enhanced)
+  // 🔊 Text-to-Speech
   const speakText = (text, autoPlay = false) => {
-    if (!window.speechSynthesis || isMuted) return; // 🔇 Check Mute
-
-    window.speechSynthesis.cancel(); // Stop previous
+    if (!window.speechSynthesis || isMuted) return;
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-
-    // 🌐 Language-based Voice Selection
     const voices = window.speechSynthesis.getVoices();
     let selectedVoice = null;
-
-    // Map user language preference to voice selection
     const languageMap = {
       'Hindi': ['hi-IN', 'Hindi', 'हिन्दी'],
       'Hinglish': ['en-IN', 'India', 'Indian'],
       'English': ['en-IN', 'en-US', 'en-GB', 'English'],
       'Marathi': ['mr-IN', 'Marathi', 'मराठी']
     };
-
     const searchTerms = languageMap[user?.language] || languageMap['Hinglish'];
-
-    // Find best matching voice
     for (const term of searchTerms) {
-      selectedVoice = voices.find(v =>
-        v.lang === term ||
-        v.lang.startsWith(term) ||
-        v.name.includes(term)
-      );
+      selectedVoice = voices.find(v => v.lang === term || v.lang.startsWith(term) || v.name.includes(term));
       if (selectedVoice) break;
     }
-
-    // Fallback to any Indian voice or first available
     if (!selectedVoice) {
-      selectedVoice = voices.find(v =>
-        v.lang.includes('IN') ||
-        v.name.includes('India')
-      ) || voices[0];
+      selectedVoice = voices.find(v => v.lang.includes('IN') || v.name.includes('India')) || voices[0];
     }
-
     if (selectedVoice) utterance.voice = selectedVoice;
-
-    // Adjust rate for Indian languages
     utterance.rate = (user?.language === 'Hindi' || user?.language === 'Marathi') ? 0.9 : 1.0;
     utterance.pitch = 1.0;
-
     window.speechSynthesis.speak(utterance);
   };
 
-  // Toggle Mute Function
   const toggleMute = () => {
     setIsMuted(prev => {
-      if (!prev) {
-        window.speechSynthesis.cancel(); // Stop speaking immediately if muting
-      }
+      if (!prev) window.speechSynthesis.cancel();
       return !prev;
     });
   };
 
-  // Ensure voices are loaded (Chrome quirk)
   useEffect(() => {
     if (window.speechSynthesis) {
       window.speechSynthesis.onvoiceschanged = () => {
@@ -175,13 +150,9 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
       audioChunksRef.current = [];
-
       mediaRecorderRef.current.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
       };
-
       mediaRecorderRef.current.start();
       setIsRecording(true);
       startTimer();
@@ -193,30 +164,28 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   // 🛑 STOP & SEND RECORDING
   const stopAndSendRecording = () => {
     if (!mediaRecorderRef.current) return;
-
     mediaRecorderRef.current.stop();
     stopTimer();
     setIsRecording(false);
-
     mediaRecorderRef.current.onstop = async () => {
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
       const audioFile = new File([audioBlob], "voice_note.wav", { type: "audio/wav" });
+<<<<<<< HEAD
 
       setMessages(prev => [...prev, { sender: 'user', text: "Audio Sent (Processing...)" }]);
 
+=======
+      setMessages(prev => [...prev, { sender: 'user', text: "🎤 Audio Sent (Processing...)" }]);
+>>>>>>> eca3acd049f54f049f897dd1f16a62b47726c9cc
       const formData = new FormData();
       formData.append("file", audioFile);
       formData.append("history", reportHistory);
-
       try {
         const response = await fetch("http://127.0.0.1:8000/voice-message", {
           method: "POST",
           body: formData,
         });
-
         const data = await response.json();
-
-        // Update User Message
         setMessages(prev => {
           const newMsgs = [...prev];
           if (newMsgs[newMsgs.length - 1].sender === 'user') {
@@ -224,26 +193,17 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
           }
           return newMsgs;
         });
-
-        // Add AI Response
         setMessages(prev => [...prev, { sender: 'ai', text: data.answer }]);
         setReportHistory(prev => `${prev}\nUser: ${data.user_text}\nAI: ${data.answer}`);
-
-        // 🔥 Speak Immediately (if not muted)
         speakText(data.answer);
-
       } catch (error) {
-        console.error("Audio Upload Error:", error);
         setMessages(prev => [...prev, { sender: 'ai', text: "⚠️ Error processing voice note." }]);
       }
     };
   };
 
-  // ❌ CANCEL RECORDING
   const cancelRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-    }
+    if (mediaRecorderRef.current) mediaRecorderRef.current.stop();
     stopTimer();
     setIsRecording(false);
   };
@@ -252,10 +212,8 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   const handleSend = async (textOverride) => {
     const textToSend = textOverride || input;
     if (!textToSend.trim()) return;
-
     setInput('');
     setMessages(prev => [...prev, { sender: 'user', text: textToSend }]);
-
     if (mode === 'report') {
       try {
         const response = await fetch("http://127.0.0.1:8000/file-report-interview", {
@@ -277,7 +235,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   return (
     <div className="flex flex-col h-full bg-transparent relative">
 
-      {/* 🔇 MUTE TOGGLE BUTTON (Top Right) */}
+      {/* 🔇 MUTE TOGGLE */}
       <button
         onClick={toggleMute}
         className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/40 border border-white/10 text-white hover:bg-white/10 transition-all shadow-lg backdrop-blur-md"
@@ -312,13 +270,15 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
                 </div>
               )}
             </div>
+
+            {/* 🔥 UPDATED: Dynamic Time-Based Greeting */}
             <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">
-              Namaste, <span className="text-accent-gold">{user?.name?.split(' ')[0] || "Citizen"}</span>! 🙏
+              {greeting}, <span className="text-accent-gold">{user?.name?.split(' ')[0] || "Citizen"}</span>!
             </h2>
 
-            {/* 🔥 UPDATED: Rotating Rights Logic Here */}
+            {/* Rotating Rights Logic */}
             <p className="text-slate-400 mt-2 text-lg font-medium max-w-lg px-4 transition-all duration-500">
-              Hello {user?.name?.split(' ')[0]}, do you know your <br />
+              Do you know your <br />
               <span className="text-accent-gold font-bold text-xl block md:inline mt-2 md:mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 key={rightIndex}">
                 {rights[rightIndex]}
               </span>
@@ -330,7 +290,6 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
 
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} group relative`}>
-            {/* Speaker Button to Replay (Hidden if muted or user msg) */}
             {msg.sender === 'ai' && (
               <button
                 onClick={() => speakText(msg.text)}
@@ -351,18 +310,13 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
         <div ref={bottomRef} />
       </div>
 
-      {/* 🎙️ Voice Assistant Waveform - Shows when listening */}
+      {/* Voice Assistant Waveform */}
       {voiceAssistantEnabled && (voiceAssistant.isListening || voiceAssistant.isProcessing) && (
         <div className="flex justify-center py-2 border-t border-white/5">
           <div className="flex flex-col items-center gap-2">
-            <VoiceWaveform
-              isActive={voiceAssistant.isListening}
-              isProcessing={voiceAssistant.isProcessing}
-            />
+            <VoiceWaveform isActive={voiceAssistant.isListening} isProcessing={voiceAssistant.isProcessing} />
             <p className="text-xs text-slate-400">
-              {voiceAssistant.isProcessing
-                ? '⚙️ Processing your command...'
-                : voiceAssistant.transcript || '🎙️ Say "Hey Sahayak" to activate'}
+              {voiceAssistant.isProcessing ? '⚙️ Processing...' : voiceAssistant.transcript || '🎙️ Say "Hey Sahayak"'}
             </p>
           </div>
         </div>
@@ -371,7 +325,6 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       {/* Input Area */}
       <div className="p-3 md:p-4 glass-panel border-t border-white/10 shrink-0">
         <div className="flex items-end gap-2 max-w-5xl mx-auto">
-          {/* 🎙️ Voice Assistant Button - Shows if supported */}
           {voiceAssistantEnabled && voiceAssistant.isSupported && (
             <VoiceAssistantButton
               isListening={voiceAssistant.isListening}
