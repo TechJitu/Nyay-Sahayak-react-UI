@@ -21,7 +21,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   // 🎙️ Voice Recording States
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [isMuted, setIsMuted] = useState(false); 
+  const [isMuted, setIsMuted] = useState(false);
 
   // ⚖️ ROTATING RIGHTS LOGIC
   const [rightIndex, setRightIndex] = useState(0);
@@ -38,7 +38,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   useEffect(() => {
     const interval = setInterval(() => {
       setRightIndex((prev) => (prev + 1) % rights.length);
-    }, 2000); 
+    }, 2000);
     return () => clearInterval(interval);
   }, []);
 
@@ -170,13 +170,9 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     mediaRecorderRef.current.onstop = async () => {
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
       const audioFile = new File([audioBlob], "voice_note.wav", { type: "audio/wav" });
-<<<<<<< HEAD
 
-      setMessages(prev => [...prev, { sender: 'user', text: "Audio Sent (Processing...)" }]);
-
-=======
       setMessages(prev => [...prev, { sender: 'user', text: "🎤 Audio Sent (Processing...)" }]);
->>>>>>> eca3acd049f54f049f897dd1f16a62b47726c9cc
+
       const formData = new FormData();
       formData.append("file", audioFile);
       formData.append("history", reportHistory);
