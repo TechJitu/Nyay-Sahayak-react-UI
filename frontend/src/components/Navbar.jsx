@@ -23,10 +23,10 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
                             Features
                         </a>
                         <a className="text-sm font-medium hover:text-primary transition-colors cursor-pointer" href="#how-it-works">
-                            How it Works
+                            Why Choose Us
                         </a>
-                        <a className="text-sm font-medium hover:text-primary transition-colors cursor-pointer" href="#security">
-                            Security
+                        <a className="text-sm font-medium hover:text-primary transition-colors cursor-pointer" href="#contact">
+                            Contact
                         </a>
                     </div>
 

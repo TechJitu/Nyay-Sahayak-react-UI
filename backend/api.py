@@ -17,8 +17,8 @@ from twilio.twiml.voice_response import VoiceResponse, Gather
 from fpdf import FPDF
 from docx import Document
 import PyPDF2
-import speech_recognition as sr
-import pyttsx3
+#import speech_recognition as sr
+#import pyttsx3
 import requests
 import time
 

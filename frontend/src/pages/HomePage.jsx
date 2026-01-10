@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, Search, MessageSquare, Building2, FileText, CheckCircle, XCircle } from 'lucide-react';
+import { Mic, Search, MessageSquare, Building2, FileText, CheckCircle, XCircle, MessageCircle, ArrowRight, Zap, DollarSign, Clock, Shield, TrendingUp, FileCheck, Sparkles, Scale, BookOpen } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -15,9 +15,46 @@ const HomePage = () => {
         setDarkMode(!darkMode);
     };
 
+    // Scroll reveal animation
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('revealed');
+                    }, index * 100);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const items = document.querySelectorAll('.reveal-item');
+        items.forEach(item => observer.observe(item));
+
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <div className="min-h-screen bg-background-light dark:bg-background-dark text-gray-900 dark:text-gray-100 font-display transition-colors duration-300">
             <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+
+            {/* Scroll Reveal Styles */}
+            <style>{`
+                .reveal-item > div:first-child {
+                    opacity: 0;
+                    transform: translateX(-50px);
+                    transition: all 0.7s ease-out;
+                }
+                .reveal-item > div:last-child {
+                    opacity: 0;
+                    transform: translateX(50px);
+                    transition: all 0.7s ease-out;
+                }
+                .reveal-item.revealed > div:first-child,
+                .reveal-item.revealed > div:last-child {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            `}</style>
 
             {/* Hero Section */}
             <header className="relative overflow-hidden pt-16 pb-24 lg:pt-32 lg:pb-40">
@@ -55,7 +92,7 @@ const HomePage = () => {
                     </h1>
 
                     <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-400">
-                        Your AI-powered legal companion. Draft documents, file reports, and get instant legal
+                        Your AI-powered legal companion. Get instant legal
                         answers with just your voice.
                     </p>
 
@@ -103,55 +140,151 @@ const HomePage = () => {
             </header>
 
             {/* Features Section */}
-            <section id="features" className="py-24 bg-gray-50 dark:bg-[#0A0A0A]">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section id="features" className="py-24 bg-gradient-to-b from-amber-50/30 to-white dark:from-gray-900 dark:to-black relative overflow-hidden">
+                {/* Background Legal Pattern */}
+                <div className="absolute inset-0 opacity-5 dark:opacity-10">
+                    <div className="absolute top-10 left-10">
+                        <Scale className="w-32 h-32 text-gray-900 dark:text-gray-100" />
+                    </div>
+                    <div className="absolute bottom-10 right-10">
+                        <Scale className="w-32 h-32 text-gray-900 dark:text-gray-100" />
+                    </div>
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                        <BookOpen className="w-48 h-48 text-gray-900 dark:text-gray-100" />
+                    </div>
+                </div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
-                        <h2 className="text-3xl font-bold tracking-tight mb-4">Empowering Citizens with AI</h2>
-                        <p className="text-gray-600 dark:text-gray-400">
-                            Streamlining the complexity of the Indian legal system.
+                        <div className="inline-flex items-center gap-3 mb-6">
+                            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent to-primary"></div>
+                            <Scale className="w-8 h-8 text-primary" />
+                            <div className="w-12 h-0.5 bg-gradient-to-l from-transparent to-primary"></div>
+                        </div>
+                        <h2 className="text-3xl font-bold tracking-tight mb-4 font-serif">Empowering Citizens with AI</h2>
+                        <p className="text-gray-600 dark:text-gray-400 italic">
+                            "Streamlining the complexity of the Indian legal system"
                         </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {/* Feature 1 */}
-                        <div className="group relative p-8 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-2xl hover:border-primary/50 transition-all duration-300 hover:shadow-xl dark:hover:shadow-primary/5">
-                            <div className="w-14 h-14 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6 group-hover:bg-primary transition-colors duration-300">
-                                <MessageSquare className="w-8 h-8 text-gray-700 dark:text-white group-hover:text-black" />
+                        {/* Feature 1 - Legal Document Style */}
+                        <div className="group relative">
+                            {/* Parchment/Document Effect */}
+                            <div className="absolute -inset-1 bg-gradient-to-br from-amber-200 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur"></div>
+
+                            <div className="relative bg-gradient-to-br from-amber-50 to-white dark:from-gray-800 dark:to-gray-900 border-2 border-amber-900/20 dark:border-primary/30 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500">
+                                {/* Top Border - Legal Header */}
+                                <div className="h-3 bg-gradient-to-r from-amber-900 via-primary to-amber-900 dark:from-primary/80 dark:via-primary dark:to-primary/80"></div>
+
+                                {/* Official Stamp/Seal Corner */}
+                                <div className="absolute top-6 right-6 w-16 h-16 rounded-full border-4 border-primary/30 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                                    <MessageSquare className="w-8 h-8 text-primary" />
+                                </div>
+
+                                <div className="p-8 pt-6">
+                                    {/* Document Title Bar */}
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary to-yellow-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <MessageSquare className="w-8 h-8 text-black" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold mb-1 font-serif text-gray-900 dark:text-white">Smart Legal Chat</h3>
+                                            <div className="h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+                                        </div>
+                                    </div>
+
+                                    {/* Document Content */}
+                                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 text-sm">
+                                        Interact with our AI trained on <strong className="text-amber-900 dark:text-primary">Indian Penal Code</strong> and <strong className="text-amber-900 dark:text-primary">Constitution</strong>. Get instant, accurate answers in any local language.
+                                    </p>
+
+                                    {/* Bottom Line */}
+                                    <div className="flex items-center gap-2 pt-4 border-t border-amber-900/10 dark:border-primary/10">
+                                        <div className="flex-1 h-px bg-gradient-to-r from-amber-900/20 to-transparent dark:from-primary/20"></div>
+                                        <Scale className="w-4 h-4 text-primary" />
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Smart Legal Chat</h3>
-                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Interact with our AI trained on Indian Penal Code and Constitution. Get instant,
-                                accurate answers in any local language.
-                            </p>
                         </div>
 
-                        {/* Feature 2 */}
-                        <div className="group relative p-8 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-2xl hover:border-primary/50 transition-all duration-300 hover:shadow-xl dark:hover:shadow-primary/5">
-                            <div className="w-14 h-14 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6 group-hover:bg-primary transition-colors duration-300">
-                                <Building2 className="w-8 h-8 text-gray-700 dark:text-white group-hover:text-black" />
+                        {/* Feature 2 - Legal Document Style */}
+                        <div className="group relative">
+                            <div className="absolute -inset-1 bg-gradient-to-br from-amber-200 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur"></div>
+
+                            <div className="relative bg-gradient-to-br from-amber-50 to-white dark:from-gray-800 dark:to-gray-900 border-2 border-amber-900/20 dark:border-primary/30 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500">
+                                <div className="h-3 bg-gradient-to-r from-amber-900 via-primary to-amber-900 dark:from-primary/80 dark:via-primary dark:to-primary/80"></div>
+
+                                <div className="absolute top-6 right-6 w-16 h-16 rounded-full border-4 border-primary/30 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                                    <Building2 className="w-8 h-8 text-primary" />
+                                </div>
+
+                                <div className="p-8 pt-6">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <Building2 className="w-8 h-8 text-black" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold mb-1 font-serif text-gray-900 dark:text-white">Digital Seva</h3>
+                                            <div className="h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 text-sm">
+                                        Direct integration with government portals. Access <strong className="text-amber-900 dark:text-primary">e-Courts</strong>, file <strong className="text-amber-900 dark:text-primary">FIRs</strong>, and track case status without the bureaucracy.
+                                    </p>
+
+                                    <div className="flex items-center gap-2 pt-4 border-t border-amber-900/10 dark:border-primary/10">
+                                        <div className="flex-1 h-px bg-gradient-to-r from-amber-900/20 to-transparent dark:from-primary/20"></div>
+                                        <Scale className="w-4 h-4 text-primary" />
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Digital Seva</h3>
-                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Direct integration with government portals. Access e-Courts, file FIRs, and track
-                                case status without the bureaucracy.
-                            </p>
                         </div>
 
-                        <div className="group relative p-8 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-2xl hover:border-primary/50 transition-all duration-300 hover:shadow-xl dark:hover:shadow-primary/5">
-                            <div className="w-14 h-14 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6 group-hover:bg-primary transition-colors duration-300">
-                                <Mic className="w-8 h-8 text-gray-700 dark:text-white group-hover:text-black" />
+                        {/* Feature 3 - Legal Document Style */}
+                        <div className="group relative">
+                            <div className="absolute -inset-1 bg-gradient-to-br from-amber-200 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur"></div>
+
+                            <div className="relative bg-gradient-to-br from-amber-50 to-white dark:from-gray-800 dark:to-gray-900 border-2 border-amber-900/20 dark:border-primary/30 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-500">
+                                <div className="h-3 bg-gradient-to-r from-amber-900 via-primary to-amber-900 dark:from-primary/80 dark:via-primary dark:to-primary/80"></div>
+
+                                <div className="absolute top-6 right-6 w-16 h-16 rounded-full border-4 border-primary/30 flex items-center justify-center bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                                    <Mic className="w-8 h-8 text-primary" />
+                                </div>
+
+                                <div className="p-8 pt-6">
+                                    <div className="flex items-start gap-4 mb-6">
+                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-primary flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                            <Mic className="w-8 h-8 text-black" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold mb-1 font-serif text-gray-900 dark:text-white">Voice AI Assistant</h3>
+                                            <div className="h-px bg-gradient-to-r from-primary/50 to-transparent"></div>
+                                        </div>
+                                    </div>
+
+                                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 text-sm">
+                                        Just say <strong className="text-amber-900 dark:text-primary">"Hey Sahayak"</strong> and speak your legal query in any language. Our AI responds instantly with accurate legal guidance.
+                                    </p>
+
+                                    <div className="flex items-center gap-2 pt-4 border-t border-amber-900/10 dark:border-primary/10">
+                                        <div className="flex-1 h-px bg-gradient-to-r from-amber-900/20 to-transparent dark:from-primary/20"></div>
+                                        <Scale className="w-4 h-4 text-primary" />
+                                    </div>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Voice AI Assistant</h3>
-                            <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Just say "Hey Sahayak" and speak your legal query in any language. Our AI responds instantly with accurate legal guidance.
-                            </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black relative overflow-hidden">
+                {/* Background Effects */}
+                <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">
                             Get Legal Help in <span className="text-primary">3 Simple Steps</span>
@@ -161,109 +294,322 @@ const HomePage = () => {
                         </p>
                     </div>
 
-                    <div className="relative">
-                        <div className="hidden md:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20"></div>
+                    {/* Timeline Container */}
+                    <div className="relative max-w-3xl mx-auto">
+                        {/* Vertical Timeline Line */}
+                        <div className="absolute left-10 top-0 bottom-0 w-1">
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-200 dark:via-gray-700 to-transparent"></div>
+                            <div className="absolute inset-0 bg-gradient-to-b from-primary/0 via-primary to-primary/0 animate-pulse"></div>
+                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-                            <div className="text-center">
-                                <div className="relative inline-block mb-6">
-                                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-black font-bold text-2xl shadow-xl transform hover:scale-110 transition-transform">
-                                        1
+                        {/* Timeline Steps */}
+                        <div className="space-y-16 relative">
+
+                            {/* Step 1 */}
+                            <div className="group relative flex items-start gap-8">
+                                {/* Icon on the left */}
+                                <div className="relative inline-block flex-shrink-0">
+                                    {/* Outer Glow */}
+                                    <div className="absolute -inset-6 bg-gradient-to-r from-primary/30 to-blue-500/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                                    {/* Pulse Rings */}
+                                    <div className="absolute -inset-2 rounded-full border-2 border-primary/30 animate-ping"></div>
+                                    <div className="absolute -inset-4 rounded-full border border-primary/20 animate-pulse"></div>
+
+                                    {/* Main Circle */}
+                                    <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary via-yellow-400 to-primary flex items-center justify-center shadow-2xl group-hover:shadow-primary/50 transition-shadow duration-500 z-10">
+                                        <MessageCircle className="w-9 h-9 text-black group-hover:scale-110 transition-transform duration-300" />
+                                    </div>
+
+                                    {/* Step Number Badge */}
+                                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-black dark:bg-white flex items-center justify-center shadow-lg z-20">
+                                        <span className="text-xs font-bold text-primary">1</span>
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-bold mb-3">Ask Your Question</h3>
-                                <p className="text-gray-600 dark:text-gray-400">
-                                    Type or speak your legal query in any language
-                                </p>
+
+                                {/* Content on the right */}
+                                <div className="flex-1 pt-4 transform transition-all duration-500 group-hover:translate-x-2">
+                                    <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors duration-300">
+                                        Ask Your Question
+                                    </h3>
+                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
+                                        Type or speak your legal query in any language. Our AI understands multiple Indian languages and dialects.
+                                    </p>
+
+                                    {/* Decorative Bottom Line */}
+                                    <div className="mt-6 w-24 h-1 bg-gradient-to-r from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                </div>
                             </div>
 
-                            <div className="text-center">
-                                <div className="relative inline-block mb-6">
-                                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-black font-bold text-2xl shadow-xl transform hover:scale-110 transition-transform">
-                                        2
+                            {/* Step 2 */}
+                            <div className="group relative flex items-start gap-8">
+                                {/* Icon on the left */}
+                                <div className="relative inline-block flex-shrink-0">
+                                    {/* Outer Glow */}
+                                    <div className="absolute -inset-6 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                                    {/* Pulse Rings */}
+                                    <div className="absolute -inset-2 rounded-full border-2 border-primary/30 animate-ping"></div>
+                                    <div className="absolute -inset-4 rounded-full border border-primary/20 animate-pulse"></div>
+
+                                    {/* Main Circle */}
+                                    <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 via-primary to-blue-500 flex items-center justify-center shadow-2xl group-hover:shadow-blue-500/50 transition-shadow duration-500 z-10">
+                                        <Zap className="w-9 h-9 text-black group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
+                                    </div>
+
+                                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-black dark:bg-white flex items-center justify-center shadow-lg z-20">
+                                        <span className="text-xs font-bold text-primary">2</span>
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-bold mb-3">Get Instant Answers</h3>
-                                <p className="text-gray-600 dark:text-gray-400">
-                                    Receive accurate legal guidance based on Indian laws
-                                </p>
+
+                                {/* Content on the right */}
+                                <div className="flex-1 pt-4 transform transition-all duration-500 group-hover:translate-x-2">
+                                    <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors duration-300">
+                                        Get Instant Answers
+                                    </h3>
+                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
+                                        Receive accurate legal guidance based on Indian laws, powered by AI trained on IPC and Constitution.
+                                    </p>
+
+                                    <div className="mt-6 w-24 h-1 bg-gradient-to-r from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                </div>
                             </div>
 
-                            <div className="text-center">
-                                <div className="relative inline-block mb-6">
-                                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-black font-bold text-2xl shadow-xl transform hover:scale-110 transition-transform">
-                                        3
+                            {/* Step 3 */}
+                            <div className="group relative flex items-start gap-8">
+                                {/* Icon on the left */}
+                                <div className="relative inline-block flex-shrink-0">
+                                    {/* Outer Glow */}
+                                    <div className="absolute -inset-6 bg-gradient-to-r from-green-500/30 to-primary/30 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                                    {/* Pulse Rings */}
+                                    <div className="absolute -inset-2 rounded-full border-2 border-primary/30 animate-ping"></div>
+                                    <div className="absolute -inset-4 rounded-full border border-primary/20 animate-pulse"></div>
+
+                                    {/* Main Circle */}
+                                    <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-green-500 via-primary to-green-500 flex items-center justify-center shadow-2xl group-hover:shadow-green-500/50 transition-shadow duration-500 z-10">
+                                        <CheckCircle className="w-9 h-9 text-black group-hover:scale-110 transition-transform duration-300" />
+                                    </div>
+
+                                    <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-black dark:bg-white flex items-center justify-center shadow-lg z-20">
+                                        <span className="text-xs font-bold text-primary">3</span>
                                     </div>
                                 </div>
-                                <h3 className="text-xl font-bold mb-3">Take Action</h3>
-                                <p className="text-gray-600 dark:text-gray-400">
-                                    File FIRs, access portals, or get legal aid
-                                </p>
+
+                                {/* Content on the right */}
+                                <div className="flex-1 pt-4 transform transition-all duration-500 group-hover:translate-x-2">
+                                    <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors duration-300">
+                                        Take Action
+                                    </h3>
+                                    <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-lg">
+                                        File FIRs, access government portals, track cases, or connect with legal aid - all in one place.
+                                    </p>
+
+                                    <div className="mt-6 w-24 h-1 bg-gradient-to-r from-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="how-it-works" className="py-24 relative overflow-hidden">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {/* Traditional Process */}
-                        <div className="space-y-8 order-2 lg:order-1">
-                            <div className="p-8 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30">
-                                <h3 className="text-2xl font-bold text-red-600 dark:text-red-400 mb-6 flex items-center gap-2">
-                                    <XCircle className="w-7 h-7" />
-                                    Traditional Legal Process
-                                </h3>
-                                <ul className="space-y-4">
-                                    <li className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
-                                        <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-                                        <span>Expensive consultation fees just for basic advice.</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
-                                        <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-                                        <span>Weeks of waiting for document drafting.</span>
-                                    </li>
-                                    <li className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
-                                        <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-                                        <span>Complex legal jargon that is hard to understand.</span>
-                                    </li>
-                                </ul>
-                            </div>
+            <section id="how-it-works" className="py-24 relative overflow-hidden bg-gray-50 dark:bg-[#0A0A0A]">
+                {/* Background Effects */}
+                <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/5 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                            Why Choose <span className="text-primary">Nyay Sahayak</span>?
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            Breaking free from the chains of traditional legal barriers
+                        </p>
+                    </div>
+
+                    {/* Timeline Container */}
+                    <div className="relative max-w-6xl mx-auto">
+                        {/* Center Vertical Line */}
+                        <div className="absolute left-1/2 top-0 bottom-0 w-1 -translate-x-1/2 hidden md:block">
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-gray-300 dark:via-gray-700 to-transparent"></div>
+                            <div className="absolute inset-0 bg-gradient-to-b from-red-500/0 via-red-500/30 to-primary/30 animate-pulse"></div>
                         </div>
 
-                        {/* Nyay Sahayak Way */}
-                        <div className="space-y-8 order-1 lg:order-2">
-                            <div className="relative">
-                                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-yellow-600 rounded-2xl blur opacity-25"></div>
-                                <div className="relative p-8 rounded-2xl bg-background-light dark:bg-surface-dark border border-primary/30 shadow-2xl">
-                                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
-                                        <CheckCircle className="w-7 h-7 text-primary" />
-                                        The Nyay Sahayak Way
-                                    </h3>
-                                    <ul className="space-y-4">
-                                        <li className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
-                                            <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                                            <span>
-                                                <strong>Free & Instant</strong> access to legal information via AI.
-                                            </span>
-                                        </li>
-                                        <li className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
-                                            <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                                            <span>
-                                                <strong>One-Click</strong> document generation ready for print.
-                                            </span>
-                                        </li>
-                                        <li className="flex items-start gap-3 text-gray-700 dark:text-gray-300">
-                                            <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                                            <span>
-                                                <strong>Simplified language</strong> translated to your dialect.
-                                            </span>
-                                        </li>
-                                    </ul>
+                        {/* Comparison Items */}
+                        <div className="space-y-24 md:space-y-32">
 
+                            {/* Item 1 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center relative reveal-item">
+                                <div className="md:text-right">
+                                    <div className="inline-block md:ml-auto bg-red-50 dark:bg-red-900/10 border-2 border-red-200 dark:border-red-900/30 rounded-2xl p-6 max-w-md">
+                                        <div className="flex md:flex-row-reverse items-start gap-4 md:text-right">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
+                                                <DollarSign className="w-6 h-6 text-white" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-red-600 dark:text-red-400 mb-2">Financial Drain</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Draining hard-earned savings just to ask a simple question.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-primary to-yellow-600 flex items-center justify-center shadow-2xl border-4 border-white dark:border-gray-900 hidden md:flex z-10">
+                                    <span className="text-black font-bold text-xl">VS</span>
+                                </div>
+                                <div className="md:text-left">
+                                    <div className="inline-block bg-primary/10 dark:bg-primary/5 border-2 border-primary/30 rounded-2xl p-6 max-w-md relative">
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-yellow-600 rounded-2xl blur opacity-20"></div>
+                                        <div className="relative flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary via-yellow-400 to-primary flex items-center justify-center flex-shrink-0 shadow-lg">
+                                                <Sparkles className="w-6 h-6 text-black" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-primary mb-2">Zero-Cost Clarity</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Instant, 24/7 legal guidance without the heavy price tag.</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Item 2 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center relative reveal-item">
+                                <div className="md:text-right">
+                                    <div className="inline-block md:ml-auto bg-red-50 dark:bg-red-900/10 border-2 border-red-200 dark:border-red-900/30 rounded-2xl p-6 max-w-md">
+                                        <div className="flex md:flex-row-reverse items-start gap-4 md:text-right">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
+                                                <Clock className="w-6 h-6 text-white" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-red-600 dark:text-red-400 mb-2">Endless Delays</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Life put on hold for weeks waiting for basic paperwork.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-primary flex items-center justify-center shadow-2xl border-4 border-white dark:border-gray-900 hidden md:flex z-10">
+                                    <span className="text-black font-bold text-xl">VS</span>
+                                </div>
+                                <div className="md:text-left">
+                                    <div className="inline-block bg-primary/10 dark:bg-primary/5 border-2 border-primary/30 rounded-2xl p-6 max-w-md relative">
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-primary rounded-2xl blur opacity-20"></div>
+                                        <div className="relative flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 via-primary to-blue-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                                                <Zap className="w-6 h-6 text-black" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-primary mb-2">Lightning Speed</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Auto-draft professional FIRs and contracts in seconds.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Item 3 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center relative reveal-item">
+                                <div className="md:text-right">
+                                    <div className="inline-block md:ml-auto bg-red-50 dark:bg-red-900/10 border-2 border-red-200 dark:border-red-900/30 rounded-2xl p-6 max-w-md">
+                                        <div className="flex md:flex-row-reverse items-start gap-4 md:text-right">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
+                                                <XCircle className="w-6 h-6 text-white" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-red-600 dark:text-red-400 mb-2">Intimidation</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Confusing jargon designed to make you feel powerless.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-primary flex items-center justify-center shadow-2xl border-4 border-white dark:border-gray-900 hidden md:flex z-10">
+                                    <span className="text-black font-bold text-xl">VS</span>
+                                </div>
+                                <div className="md:text-left">
+                                    <div className="inline-block bg-primary/10 dark:bg-primary/5 border-2 border-primary/30 rounded-2xl p-6 max-w-md relative">
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-primary rounded-2xl blur opacity-20"></div>
+                                        <div className="relative flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 via-primary to-purple-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                                                <MessageSquare className="w-6 h-6 text-black" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-primary mb-2">Knowledge is Power</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Complex laws decoded into your local language.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Item 4 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center relative reveal-item">
+                                <div className="md:text-right">
+                                    <div className="inline-block md:ml-auto bg-red-50 dark:bg-red-900/10 border-2 border-red-200 dark:border-red-900/30 rounded-2xl p-6 max-w-md">
+                                        <div className="flex md:flex-row-reverse items-start gap-4 md:text-right">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
+                                                <Shield className="w-6 h-6 text-white" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-red-600 dark:text-red-400 mb-2">Fear of Exploitation</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Vulnerable to manipulation due to lack of knowledge.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-primary flex items-center justify-center shadow-2xl border-4 border-white dark:border-gray-900 hidden md:flex z-10">
+                                    <span className="text-black font-bold text-xl">VS</span>
+                                </div>
+                                <div className="md:text-left">
+                                    <div className="inline-block bg-primary/10 dark:bg-primary/5 border-2 border-primary/30 rounded-2xl p-6 max-w-md relative">
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-green-500 to-primary rounded-2xl blur opacity-20"></div>
+                                        <div className="relative flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 via-primary to-green-500 flex items-center justify-center flex-shrink-0 shadow-lg">
+                                                <FileCheck className="w-6 h-6 text-black" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-primary mb-2">The Upper Hand</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Back your stance with AI-driven research and citations.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Item 5 */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center relative reveal-item">
+                                <div className="md:text-right">
+                                    <div className="inline-block md:ml-auto bg-red-50 dark:bg-red-900/10 border-2 border-red-200 dark:border-red-900/30 rounded-2xl p-6 max-w-md">
+                                        <div className="flex md:flex-row-reverse items-start gap-4 md:text-right">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-600 flex items-center justify-center flex-shrink-0">
+                                                <TrendingUp className="w-6 h-6 text-white rotate-180" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-red-600 dark:text-red-400 mb-2">Inaccessible Justice</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">The system feels like a luxury reserved only for the rich.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-primary to-yellow-600 flex items-center justify-center shadow-2xl border-4 border-white dark:border-gray-900 hidden md:flex z-10">
+                                    <span className="text-black font-bold text-xl">VS</span>
+                                </div>
+                                <div className="md:text-left">
+                                    <div className="inline-block bg-primary/10 dark:bg-primary/5 border-2 border-primary/30 rounded-2xl p-6 max-w-md relative">
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-yellow-600 rounded-2xl blur opacity-20"></div>
+                                        <div className="relative flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary via-yellow-400 to-primary flex items-center justify-center flex-shrink-0 shadow-lg">
+                                                <Shield className="w-6 h-6 text-black" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-primary mb-2">Total Control</h4>
+                                                <p className="text-gray-700 dark:text-gray-300 text-sm">Navigate the legal system with confidence, not fear.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -276,5 +622,6 @@ const HomePage = () => {
         </div>
     );
 };
+
 
 export default HomePage;
