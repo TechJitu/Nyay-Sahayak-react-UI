@@ -24,6 +24,11 @@ TWILIO_AUTH_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 TWILIO_PHONE_NUMBER = "+1xxxxxxxxxx" 
 VERIFIED_FRIENDS = ["+919876543210", "+919988776655"] 
 app = FastAPI(title="Nyay Sahayak API", version="Final Hackathon Edition")
+# ✅ TERE NUMBERS
+TWILIO_PHONE_NUMBER = "+12765798633" 
+VERIFIED_FRIENDS = ["+918976021711"] 
+
+app = FastAPI(title="Nyay Sahayak API", version="Final Hackathon Edition")
 
 app.add_middleware(
     CORSMiddleware,
@@ -147,20 +152,20 @@ async def generate_legal_notice(data: NoticeRequest):
         # Body
         pdf.set_font("Arial", size=12)
         notice_text = f"""To,
-{details['receiver_name']}
+{details.get('receiver_name', 'Receiver')}
 (Address Unknown)
 
 SUBJECT: LEGAL NOTICE FOR RECOVERY OF DUES / GRIEVANCE REDRESSAL
 
 Sir/Madam,
 
-1. Under the instruction of my client, {details['sender_name']}, I hereby serve you this legal notice.
+1. Under the instruction of my client, {details.get('sender_name', '[Your Name]')}, I hereby serve you this legal notice.
 
-2. That you are legally liable to pay/resolve the issue regarding: {details['reason']}.
+2. That you are legally liable to pay/resolve the issue regarding: {details.get('reason', 'Grievance')}.
 
-3. That despite repeated reminders, you have failed to comply. The outstanding amount involved is {details['amount']}.
+3. That despite repeated reminders, you have failed to comply. The outstanding amount involved is {details.get('amount', 'N/A')}.
 
-4. This act of yours falls under {details['act']} and other relevant provisions of the Indian Penal Code.
+4. This act of yours falls under {details.get('act', 'Indian Law')} and other relevant provisions of the Indian Penal Code.
 
 5. I hereby call upon you to resolve this matter within 15 days of receipt of this notice, failing which my client shall be constrained to initiate civil/criminal proceedings against you at your risk and cost.
 
@@ -172,12 +177,13 @@ Nyay Sahayak AI Legal Cell
         pdf.multi_cell(0, 8, txt=notice_text)
         
         # Output
-        filename = f"Legal_Notice_{details['receiver_name'].replace(' ', '_')}.pdf"
+        filename = f"Legal_Notice_{details.get('receiver_name', 'Receiver').replace(' ', '_')}.pdf"
         pdf.output(filename)
         
         return FileResponse(path=filename, filename=filename, media_type='application/pdf')
         
     except Exception as e:
+        print(f"Error generating notice: {e}")
         return {"error": str(e)}
 
 # ==========================================
