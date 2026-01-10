@@ -144,6 +144,52 @@ Nyay-Sahayak-react-UI/
 3. AI responds in the **same language** you spoke
 4. Click the speaker icon to hear the response
 
+## Deploy to Render (Free)
+
+### Step 1: Push to GitHub
+```bash
+git add .
+git commit -m "Ready for deployment"
+git push origin main
+```
+
+### Step 2: Deploy Backend (API)
+
+1. Go to [Render Dashboard](https://dashboard.render.com/)
+2. Click **New** > **Web Service**
+3. Connect your GitHub repo
+4. Configure:
+   - **Name**: `nyay-sahayak-api`
+   - **Root Directory**: `backend`
+   - **Runtime**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn api:app --host 0.0.0.0 --port $PORT`
+5. Add Environment Variable:
+   - Key: `GROQ_API_KEY`
+   - Value: `your_groq_api_key`
+6. Click **Create Web Service**
+7. Copy your backend URL (e.g., `https://nyay-sahayak-api.onrender.com`)
+
+### Step 3: Deploy Frontend
+
+1. Click **New** > **Static Site**
+2. Connect same GitHub repo
+3. Configure:
+   - **Name**: `nyay-sahayak`
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm install && npm run build`
+   - **Publish Directory**: `dist`
+4. Add Environment Variable:
+   - Key: `VITE_API_URL`
+   - Value: `https://nyay-sahayak-api.onrender.com` (your backend URL)
+5. Click **Create Static Site**
+
+### Step 4: Update Firebase
+
+Add your Render frontend URL to Firebase authorized domains:
+1. Go to Firebase Console > Authentication > Settings
+2. Add your Render URL to **Authorized domains**
+
 ## Security Notes
 
 - **Never commit API keys** to version control

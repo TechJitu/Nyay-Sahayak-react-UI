@@ -12,6 +12,7 @@ import { useLegalAI } from './hooks/useLegalAI';
 import { auth, provider, db } from './firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import API_BASE_URL from './config/api';
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children, isAuthenticated }) => {
@@ -97,7 +98,7 @@ function App() {
     if (mode === 'report') {
       setReportLoading(true);
       try {
-        const response = await fetch("http://127.0.0.1:8000/file-report-interview", {
+        const response = await fetch(`${API_BASE_URL}/file-report-interview`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -132,7 +133,7 @@ function App() {
 
         let bodyContent = { message: text, history: conversationHistory };
 
-        const response = await fetch("http://127.0.0.1:8000/stream-chat", {
+        const response = await fetch(`${API_BASE_URL}/stream-chat`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(bodyContent),
