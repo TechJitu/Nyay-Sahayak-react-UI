@@ -260,3 +260,10 @@ async def generate_rent_agreement(data: RentAgreementQuery):
         return FileResponse(path=filename, filename=filename, media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     except Exception as e:
         return {"error": str(e)}
+
+# Run the application (for Render deployment)
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
+
