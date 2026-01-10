@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react'; // Mobile Icon
+import { Menu } from 'lucide-react'; 
 import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
-import AdvocateDashboard from './components/AdvocateDashboard';
+// import AdvocateDashboard hataya diya gaya hai
 import BootScreen from './components/BootScreen';
 import SettingsModal from './components/Modals/SettingsModal';
 import DocGenModal from './components/Modals/DocGenModal';
 import Login from './components/Login'; 
-import GovServices from './components/GovServices'; // Digital Seva
+import GovServices from './components/GovServices'; 
 import { useLegalAI } from './hooks/useLegalAI';
 import { auth, provider, db } from './firebase'; 
 import { signInWithPopup, signOut } from 'firebase/auth';
@@ -43,15 +43,12 @@ function App() {
   });
 
   const { sendMessage, generateLegalNotice, generateRentAgreement, loading: aiLoading } = useLegalAI();
-  
-  // Combine loading states
   const loading = aiLoading || reportLoading;
 
   useEffect(() => {
     localStorage.setItem('nyay_user', JSON.stringify(user));
   }, [user]);
 
-  // Auth Listener
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
       if (currentUser) {
@@ -83,18 +80,16 @@ function App() {
     setIsAuthenticated(false);
   };
 
-  // Handle Send Message
   const handleSendMessage = async (text, isKavach = false) => {
     const newMessages = [...messages, { sender: 'user', text }];
     setMessages(newMessages);
     
     let aiText = "";
 
-    // BRANCH 1: POLICE REPORT MODE
     if (mode === 'report') {
         setReportLoading(true);
         try {
-            const response = await fetch("http://127.0.0.1:8000/file-report-interview", {
+            const response = await fetch("http://127.0.0.1:8000/voice-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -102,16 +97,26 @@ function App() {
                     history: reportHistory
                 }),
             });
+            if(!response.ok) throw new Error("Voice endpoint failed");
+            
             const data = await response.json();
             aiText = data.answer;
-
             setReportHistory(prev => `${prev}\nUser: ${text}\nAI: ${aiText}`);
         } catch (error) {
-            aiText = "⚠️ Connection Error: Police Station server is down.";
+             try {
+                const res = await fetch("http://127.0.0.1:8000/file-report-interview", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_input: text, history: reportHistory }),
+                });
+                const data = await res.json();
+                aiText = data.answer;
+             } catch(e) {
+                aiText = "⚠️ Connection Error: Police Station server is down.";
+             }
         }
         setReportLoading(false);
     } 
-    // BRANCH 2: NORMAL CHAT
     else {
         let finalMsg = text;
         if(isKavach) {
@@ -132,7 +137,6 @@ function App() {
     const finalMessages = [...newMessages, { sender: 'ai', text: aiText }];
     setMessages(finalMessages);
 
-    // Save to Firebase
     if (auth.currentUser) {
         const today = new Date().toISOString().split('T')[0]; 
         const chatId = `chat_${auth.currentUser.uid}_${today}`; 
@@ -204,13 +208,13 @@ function App() {
             setMessages(chat.messages || []); 
             setMode(chat.mode || 'chat');
         }}
-        isOpen={isMobileMenuOpen} // Mobile State
-        onClose={() => setIsMobileMenuOpen(false)} // Mobile Close
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
       />
 
       <main className="flex-1 relative flex flex-col h-full z-10 w-full">
         
-        {/* Mobile Header with Hamburger Menu */}
+        {/* Mobile Header */}
         <div className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/10 sticky top-0 z-20 bg-bg-deep/80 backdrop-blur-md">
             <div className="flex items-center gap-3">
                 <button 
@@ -226,10 +230,8 @@ function App() {
             </div>
         </div>
         
-        {/* Main Content Logic */}
-        {mode === 'advocate' ? (
-          <AdvocateDashboard />
-        ) : mode === 'digital' ? (
+        {/* 🔥 UPDATED RENDER LOGIC: Advocate Dashboard Removed */}
+        {mode === 'digital' ? (
            <GovServices />
         ) : (
           <ChatInterface 

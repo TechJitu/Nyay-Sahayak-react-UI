@@ -6,7 +6,7 @@ import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onClose }) => {
   const [history, setHistory] = useState([]);
   
-  // ✅ Helper Function: Initials nikalne ke liye (Fixed Error)
+  // ✅ Helper Function for Initials (Fixes crash)
   const getInitials = (name) => {
     return name && name.length > 0 ? name.charAt(0).toUpperCase() : "U";
   };
@@ -30,15 +30,15 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
     if (auth.currentUser) fetchHistory();
   }, [mode]);
 
+  // ✅ Menu Items (Advocate Removed)
   const menuItems = [
     { id: 'chat', label: 'Legal Assistant', icon: <MessageSquare size={20} /> },
     { id: 'draft', label: 'Draft Documents', icon: <FileText size={20} /> },
     { id: 'report', label: 'File Report (FIR)', icon: <Shield size={20} /> },
     { id: 'digital', label: 'E-Legal Seva', icon: <Globe size={20} /> },
-    { id: 'advocate', label: 'Advocate Dashboard', icon: <Settings size={20} /> },
   ];
 
-  // 🔥 Responsive Classes Logic
+  // Responsive Classes Logic
   const sidebarClasses = `
     fixed inset-y-0 left-0 z-50 w-72 bg-black/95 backdrop-blur-xl border-r border-white/10 
     transform transition-transform duration-300 ease-in-out
@@ -62,7 +62,7 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
         <div className="p-6 border-b border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
                 
-                {/* 🟢 PROFILE PICTURE LOGIC */}
+                {/* Profile Picture Logic */}
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-gold to-yellow-700 flex items-center justify-center text-black font-bold text-lg overflow-hidden shrink-0 relative">
                     {user.photo ? (
                         <>
@@ -72,12 +72,11 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
                                 className="w-full h-full object-cover" 
                                 referrerPolicy="no-referrer"
                                 onError={(e) => {
-                                    e.currentTarget.style.display = 'none'; // Hide broken image
+                                    e.currentTarget.style.display = 'none'; 
                                     const fallback = e.currentTarget.nextSibling;
                                     if(fallback) fallback.style.display = 'flex';
                                 }}
                             />
-                            {/* Hidden Fallback */}
                             <div className="absolute inset-0 hidden items-center justify-center bg-slate-700 text-white w-full h-full">
                                 {getInitials(user.name)}
                             </div>
@@ -94,7 +93,7 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
                     <p className="text-xs text-accent-gold truncate">{user.role}</p>
                 </div>
             </div>
-            {/* ❌ Close Button */}
+            {/* Close Button */}
             <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white">
                 <X size={24} />
             </button>
