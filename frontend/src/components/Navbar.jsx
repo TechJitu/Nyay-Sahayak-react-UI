@@ -43,7 +43,7 @@ const Navbar = ({ darkMode, toggleDarkMode }) => {
 
                         {/* CTA Button */}
                         <button
-                            onClick={() => navigate('/chat')}
+                            onClick={() => navigate('/login')}
                             className="hidden sm:block bg-primary hover:bg-yellow-400 text-black font-semibold px-5 py-2.5 rounded-lg transition-all transform hover:scale-105"
                         >
                             Start for Free

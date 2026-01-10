@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageSquare, Shield, Settings, History, ChevronRight, Globe, X, ChevronLeft } from 'lucide-react';
+import { MessageSquare, Shield, Settings, History, ChevronRight, Globe, X, ChevronLeft, Plus } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
@@ -90,7 +90,21 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
 
                 {/* Menu Items */}
                 <nav className="p-2 space-y-2 mt-2">
-                    {!isCollapsed && <p className="text-xs text-slate-500 font-bold px-4 mb-2 uppercase tracking-wider">Menu</p>}
+                    <button
+                        onClick={() => {
+                            setMode('chat');
+                            onLoadChat({ messages: [], mode: 'chat' });
+                            onClose();
+                        }}
+                        className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl bg-accent-gold hover:bg-yellow-400 text-black font-bold transition-all transform hover:scale-105 shadow-lg ${isCollapsed ? 'justify-center' : ''
+                            }`}
+                        title="New Chat"
+                    >
+                        <Plus size={20} className="shrink-0" />
+                        {!isCollapsed && <span>New Chat</span>}
+                    </button>
+
+                    {!isCollapsed && <p className="text-xs text-slate-500 font-bold px-4 mt-4 mb-2 uppercase tracking-wider">Menu</p>}
                     {menuItems.map((item) => (
                         <button
                             key={item.id}

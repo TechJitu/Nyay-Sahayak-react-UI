@@ -61,7 +61,7 @@ const HomePage = () => {
 
                     {/* Microphone Button */}
                     <div className="mt-12 flex flex-col items-center justify-center">
-                        <div className="relative group cursor-pointer" onClick={() => navigate('/chat')}>
+                        <div className="relative group cursor-pointer" onClick={() => navigate('/login')}>
                             <div className="absolute -inset-4 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/40 transition-all duration-500 animate-pulse-slow"></div>
                             <button className="relative w-24 h-24 rounded-full bg-gradient-to-br from-gray-800 to-black border-2 border-primary/50 shadow-2xl flex items-center justify-center transition-transform transform group-hover:scale-110 active:scale-95">
                                 <Mic className="w-10 h-10 text-primary" />
@@ -137,22 +137,74 @@ const HomePage = () => {
                             </p>
                         </div>
 
-                        {/* Feature 3 */}
                         <div className="group relative p-8 bg-white dark:bg-surface-dark border border-gray-200 dark:border-border-dark rounded-2xl hover:border-primary/50 transition-all duration-300 hover:shadow-xl dark:hover:shadow-primary/5">
                             <div className="w-14 h-14 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6 group-hover:bg-primary transition-colors duration-300">
-                                <FileText className="w-8 h-8 text-gray-700 dark:text-white group-hover:text-black" />
+                                <Mic className="w-8 h-8 text-gray-700 dark:text-white group-hover:text-black" />
                             </div>
-                            <h3 className="text-xl font-bold mb-3">Instant Doc Gen</h3>
+                            <h3 className="text-xl font-bold mb-3">Voice AI Assistant</h3>
                             <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Generate affidavits, rent agreements, and legal notices in seconds. Just fill in
-                                the blanks or speak your details.
+                                Just say "Hey Sahayak" and speak your legal query in any language. Our AI responds instantly with accurate legal guidance.
                             </p>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Comparison Section */}
+            <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-black">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                            Get Legal Help in <span className="text-primary">3 Simple Steps</span>
+                        </h2>
+                        <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                            Your journey to legal clarity starts here
+                        </p>
+                    </div>
+
+                    <div className="relative">
+                        <div className="hidden md:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-primary/20 via-primary to-primary/20"></div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                            <div className="text-center">
+                                <div className="relative inline-block mb-6">
+                                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-black font-bold text-2xl shadow-xl transform hover:scale-110 transition-transform">
+                                        1
+                                    </div>
+                                </div>
+                                <h3 className="text-xl font-bold mb-3">Ask Your Question</h3>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Type or speak your legal query in any language
+                                </p>
+                            </div>
+
+                            <div className="text-center">
+                                <div className="relative inline-block mb-6">
+                                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-black font-bold text-2xl shadow-xl transform hover:scale-110 transition-transform">
+                                        2
+                                    </div>
+                                </div>
+                                <h3 className="text-xl font-bold mb-3">Get Instant Answers</h3>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    Receive accurate legal guidance based on Indian laws
+                                </p>
+                            </div>
+
+                            <div className="text-center">
+                                <div className="relative inline-block mb-6">
+                                    <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-black font-bold text-2xl shadow-xl transform hover:scale-110 transition-transform">
+                                        3
+                                    </div>
+                                </div>
+                                <h3 className="text-xl font-bold mb-3">Take Action</h3>
+                                <p className="text-gray-600 dark:text-gray-400">
+                                    File FIRs, access portals, or get legal aid
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="how-it-works" className="py-24 relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -210,22 +262,6 @@ const HomePage = () => {
                                         </li>
                                     </ul>
 
-                                    {/* Testimonial */}
-                                    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-800">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full bg-teal-600 flex items-center justify-center text-white text-xl font-semibold shadow-lg border-2 border-white dark:border-gray-800">
-                                                J
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                    "Namaste, Jitendra!"
-                                                </p>
-                                                <p className="text-base font-medium text-gray-900 dark:text-white">
-                                                    Your personalized legal assistant is ready.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>

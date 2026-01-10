@@ -8,7 +8,6 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   const [input, setInput] = useState('');
   const [reportHistory, setReportHistory] = useState("");
 
-  // 🕒 Time-based Greeting State
   const [greeting, setGreeting] = useState("Good Morning");
 
   useEffect(() => {
@@ -18,21 +17,20 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     else setGreeting("Good Evening");
   }, []);
 
-  // 🎙️ Voice Recording States
+  // Voice Recording States
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
-  // ⚖️ ROTATING RIGHTS LOGIC
   const [rightIndex, setRightIndex] = useState(0);
   const rights = [
-    "Right to Information (RTI) 📄",
-    "Right to Equality ⚖️",
-    "Right to Education 📚",
-    "Right to Privacy 🔐",
-    "Right Against Exploitation 🚫",
-    "Right to Free Speech 🗣️",
-    "Right to Legal Aid 🧑‍⚖️"
+    "Right to Information (RTI)",
+    "Right to Equality",
+    "Right to Education",
+    "Right to Privacy",
+    "Right Against Exploitation",
+    "Right to Free Speech",
+    "Right to Legal Aid"
   ];
 
   useEffect(() => {
@@ -42,12 +40,58 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     return () => clearInterval(interval);
   }, []);
 
+  const rolePrompts = {
+    Citizen: [
+      "How do I file a consumer complaint online?",
+      "What are my tenant rights in India?",
+      "How to get free legal aid?",
+      "Steps to file RTI application"
+    ],
+    Advocate: [
+      "Draft legal notice for cheque bounce",
+      "Recent Supreme Court judgments on Section 138",
+      "Civil procedure timeline for suit filing",
+      "Bail application format and procedure"
+    ],
+    Police: [
+      "FIR filing procedure step-by-step",
+      "When is arrest warrant required?",
+      "Evidence documentation guidelines",
+      "Cognizable vs non-cognizable offenses"
+    ],
+    Student: [
+      "Explain IPC Section 420 in detail",
+      "Difference between bail and anticipatory bail",
+      "Constitutional law fundamental rights overview",
+      "Landmark cases on Article 21"
+    ]
+  };
+
+  const roleQuickActions = {
+    Citizen: [
+      { label: "Check Case Status", query: "How can I check my case status online?" },
+      { label: "File Complaint", query: "What is the process to file an online complaint?" }
+    ],
+    Advocate: [
+      { label: "Draft Document", query: "Help me draft a legal document" },
+      { label: "Case Law Search", query: "Find recent case laws on" }
+    ],
+    Police: [
+      { label: "FIR Template", query: "Show me FIR filing template and format" },
+      { label: "Evidence Rules", query: "What are the evidence documentation rules?" }
+    ],
+    Student: [
+      { label: "Explain Concept", query: "Explain this legal concept in detail:" },
+      { label: "Case Analysis", query: "Analyze this landmark case:" }
+    ]
+  };
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const bottomRef = useRef(null);
+  const lastMessageCountRef = useRef(0);
 
-  // 🤖 Voice Assistant Integration
   const handleVoiceCommand = (command) => {
     switch (command.type) {
       case 'stop': break;
@@ -72,18 +116,24 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading, isRecording]);
 
-  // 🔊 Auto-speak AI responses
   useEffect(() => {
-    if (!voiceAssistantEnabled) return;
+    const previousCount = lastMessageCountRef.current;
+    const currentCount = messages.length;
+
+    if (!voiceAssistantEnabled || currentCount <= previousCount || currentCount !== previousCount + 1) {
+      lastMessageCountRef.current = currentCount;
+      return;
+    }
+
     const lastMessage = messages[messages.length - 1];
     if (lastMessage && lastMessage.sender === 'ai' && lastMessage.text && !loading) {
       setTimeout(() => {
         speakText(lastMessage.text, true);
       }, 300);
     }
+    lastMessageCountRef.current = currentCount;
   }, [messages, voiceAssistantEnabled, loading]);
 
-  // 🔊 Text-to-Speech
   const speakText = (text, autoPlay = false) => {
     if (!window.speechSynthesis || isMuted) return;
     window.speechSynthesis.cancel();
@@ -125,7 +175,6 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     }
   }, []);
 
-  // ⏱️ Timer Logic
   const startTimer = () => {
     setRecordingTime(0);
     timerRef.current = setInterval(() => {
@@ -144,7 +193,6 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // 🎤 START RECORDING
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -161,7 +209,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     }
   };
 
-  // 🛑 STOP & SEND RECORDING
+  // STOP & SEND RECORDING
   const stopAndSendRecording = () => {
     if (!mediaRecorderRef.current) return;
     mediaRecorderRef.current.stop();
@@ -171,7 +219,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
       const audioFile = new File([audioBlob], "voice_note.wav", { type: "audio/wav" });
 
-      setMessages(prev => [...prev, { sender: 'user', text: "🎤 Audio Sent (Processing...)" }]);
+      setMessages(prev => [...prev, { sender: 'user', text: "Audio Sent (Processing...)" }]);
 
       const formData = new FormData();
       formData.append("file", audioFile);
@@ -193,7 +241,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
         setReportHistory(prev => `${prev}\nUser: ${data.user_text}\nAI: ${data.answer}`);
         speakText(data.answer);
       } catch (error) {
-        setMessages(prev => [...prev, { sender: 'ai', text: "⚠️ Error processing voice note." }]);
+        setMessages(prev => [...prev, { sender: 'ai', text: "Error processing voice note." }]);
       }
     };
   };
@@ -221,7 +269,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
         setMessages(prev => [...prev, { sender: 'ai', text: data.answer }]);
         setReportHistory(prev => `${prev}\nUser: ${textToSend}\nAI: ${data.answer}`);
       } catch (error) {
-        setMessages(prev => [...prev, { sender: 'ai', text: "⚠️ Connection Error." }]);
+        setMessages(prev => [...prev, { sender: 'ai', text: "Connection Error." }]);
       }
     } else {
       onSendMessage(textToSend);
@@ -231,7 +279,6 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   return (
     <div className="flex flex-col h-full bg-transparent relative">
 
-      {/* 🔇 MUTE TOGGLE */}
       <button
         onClick={toggleMute}
         className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/40 border border-white/10 text-white hover:bg-white/10 transition-all shadow-lg backdrop-blur-md"
@@ -240,15 +287,14 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
         {isMuted ? <VolumeX size={20} className="text-red-400" /> : <Volume2 size={20} className="text-accent-gold" />}
       </button>
 
-      {/* 🟢 Mode Indicator */}
       <div className="absolute top-0 left-0 right-0 z-10 flex justify-center p-2 pointer-events-none">
         {mode === 'report' ? (
           <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-1 rounded-full text-[10px] md:text-xs font-bold backdrop-blur-md shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-pulse">
-            🚨 FIR FILING MODE ACTIVATED
+            FIR FILING MODE ACTIVATED
           </div>
         ) : (
           <div className="bg-accent-gold/10 border border-accent-gold/20 text-accent-gold px-4 py-1 rounded-full text-[10px] md:text-xs font-bold backdrop-blur-md">
-            🟢 NYAY SAHAYAK ACTIVE
+            NYAY SAHAYAK ACTIVE
           </div>
         )}
       </div>
@@ -267,29 +313,53 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
               )}
             </div>
 
-            {/* 🔥 UPDATED: Dynamic Time-Based Greeting */}
             <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">
               {greeting}, <span className="text-accent-gold">{user?.name?.split(' ')[0] || "Citizen"}</span>!
             </h2>
 
-            {/* Rotating Rights Logic */}
-            <p className="text-slate-400 mt-2 text-lg font-medium max-w-lg px-4 transition-all duration-500">
-              Do you know your <br />
-              <span className="text-accent-gold font-bold text-xl block md:inline mt-2 md:mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 key={rightIndex}">
-                {rights[rightIndex]}
-              </span>
-              ?
-            </p>
+
+            <div className="mt-8 w-full max-w-2xl">
+              <p className="text-sm text-slate-400 mb-3">Try asking:</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {(rolePrompts[user?.role] || rolePrompts.Citizen).map((prompt, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setInput(prompt);
+                      handleSend(prompt);
+                    }}
+                    className="text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 hover:border-accent-gold/50 transition-all text-sm text-slate-300 hover:text-white"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-3 justify-center">
+              {(roleQuickActions[user?.role] || roleQuickActions.Citizen).map((action, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setInput(action.query);
+                    handleSend(action.query);
+                  }}
+                  className="px-4 py-2 rounded-lg bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/30 hover:border-accent-gold text-accent-gold font-medium transition-all text-sm"
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
 
           </div>
         )}
 
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} group relative`}>
-            {msg.sender === 'ai' && (
+            {msg.sender === 'ai' && voiceAssistantEnabled && !isMuted && (
               <button
                 onClick={() => speakText(msg.text)}
-                className={`absolute -left-8 top-2 p-1.5 rounded-full bg-white/5 hover:bg-accent-gold text-slate-400 hover:text-black opacity-0 group-hover:opacity-100 transition-all hidden md:block ${isMuted ? 'hidden' : ''}`}
+                className="absolute -left-8 top-2 p-1.5 rounded-full bg-white/5 hover:bg-accent-gold text-slate-400 hover:text-black opacity-0 group-hover:opacity-100 transition-all hidden md:block"
               >
                 <Volume2 size={14} />
               </button>
@@ -312,7 +382,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
           <div className="flex flex-col items-center gap-2">
             <VoiceWaveform isActive={voiceAssistant.isListening} isProcessing={voiceAssistant.isProcessing} />
             <p className="text-xs text-slate-400">
-              {voiceAssistant.isProcessing ? '⚙️ Processing...' : voiceAssistant.transcript || '🎙️ Say "Hey Sahayak"'}
+              {voiceAssistant.isProcessing ? 'Processing...' : voiceAssistant.transcript || 'Say "Hey Sahayak"'}
             </p>
           </div>
         </div>

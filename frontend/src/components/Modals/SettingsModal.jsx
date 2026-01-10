@@ -1,9 +1,20 @@
-import React from 'react';
-import { X, Save, LogOut, User, MapPin, Globe, Shield, Mic } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Save, LogOut, User, MapPin, Globe, Shield, Mic, Sun, Moon } from 'lucide-react';
 
 const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark';
+  });
 
-  // Handle Input Change
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
@@ -12,7 +23,6 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-bg-deep border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
 
-        {/* Header */}
         <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
             <User className="text-accent-gold" /> Profile Settings
@@ -22,14 +32,12 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
           </button>
         </div>
 
-        {/* Body */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
 
-          {/* Photo/Avatar */}
           <div className="flex justify-center mb-6">
             <div className="w-24 h-24 rounded-full border-4 border-accent-gold/20 p-1">
               {user.photo ? (
-                <img src={user.photo} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                <img src={user.photo} alt="Profile" className="w-full h-full rounded-full object-cover" referrerPolicy="no-referrer" />
               ) : (
                 <div className="w-full h-full bg-slate-700 rounded-full flex items-center justify-center text-3xl font-bold text-slate-400">
                   {user.name[0]}
@@ -38,7 +46,6 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
             </div>
           </div>
 
-          {/* Name Input */}
           <div className="space-y-1">
             <label className="text-xs text-slate-400 uppercase font-bold tracking-wider">Full Name</label>
             <input
@@ -50,7 +57,6 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
             />
           </div>
 
-          {/* Role Selection */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-xs text-slate-400 uppercase font-bold tracking-wider flex items-center gap-1">
@@ -87,7 +93,6 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
             </div>
           </div>
 
-          {/* State Selection */}
           <div className="space-y-1">
             <label className="text-xs text-slate-400 uppercase font-bold tracking-wider flex items-center gap-1">
               <MapPin size={12} /> Location (State Laws)
@@ -106,7 +111,53 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
             </select>
           </div>
 
-          {/* Voice Assistant Toggle */}
+          <div className="space-y-1">
+            <label className="text-xs text-slate-400 uppercase font-bold tracking-wider flex items-center gap-1">
+              <Shield size={12} /> Detail Level
+            </label>
+            <select
+              name="detailLevel"
+              value={user.detailLevel || 'moderate'}
+              onChange={handleChange}
+              className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-slate-200 focus:border-accent-gold outline-none"
+            >
+              <option value="simple">Simple - Layman terms</option>
+              <option value="moderate">Moderate - Balanced detail</option>
+              <option value="technical">Technical - Full legal jargon</option>
+            </select>
+            <p className="text-xs text-slate-500 mt-1">
+              Controls how complex AI explanations are
+            </p>
+          </div>
+
+          <div className="space-y-2 p-4 bg-gradient-to-br from-blue-500/5 to-purple-600/5 border border-blue-500/20 rounded-lg">
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-slate-200 font-medium flex items-center gap-2">
+                {theme === 'dark' ? <Moon size={16} className="text-blue-400" /> : <Sun size={16} className="text-yellow-400" />}
+                Theme
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setTheme('light')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${theme === 'light' ? 'bg-yellow-400 text-black' : 'bg-black/40 text-slate-400 hover:text-white'
+                    }`}
+                >
+                  Light
+                </button>
+                <button
+                  onClick={() => setTheme('dark')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${theme === 'dark' ? 'bg-blue-500 text-white' : 'bg-black/40 text-slate-400 hover:text-white'
+                    }`}
+                >
+                  Dark
+                </button>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Choose your preferred color scheme for the interface.
+            </p>
+          </div>
+
           <div className="space-y-2 p-4 bg-gradient-to-br from-accent-gold/5 to-yellow-600/5 border border-accent-gold/20 rounded-lg">
             <div className="flex items-center justify-between">
               <label className="text-sm text-slate-200 font-medium flex items-center gap-2">
@@ -133,13 +184,11 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
 
         </div>
 
-        {/* Footer with Actions */}
         <div className="p-6 border-t border-white/10 bg-white/5 flex justify-between items-center gap-4">
 
-          {/* 🔴 LOGOUT BUTTON (Updated: No Popup) */}
           <button
             onClick={() => {
-              onLogout(); // Seedha Logout
+              onLogout();
               onClose();
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all font-medium text-sm"
@@ -147,7 +196,6 @@ const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
             <LogOut size={16} /> Log Out
           </button>
 
-          {/* Save Button */}
           <button
             onClick={onClose}
             className="flex items-center gap-2 px-6 py-2 rounded-lg bg-accent-gold text-black font-bold hover:shadow-[0_0_15px_rgba(255,215,0,0.4)] transition-all"

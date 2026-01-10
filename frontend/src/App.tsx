@@ -5,9 +5,9 @@ import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
 import BootScreen from './components/BootScreen';
 import SettingsModal from './components/Modals/SettingsModal';
-import Login from './components/Login';
 import GovServices from './components/GovServices';
 import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
 import { useLegalAI } from './hooks/useLegalAI';
 import { auth, provider, db } from './firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
@@ -19,24 +19,6 @@ const ProtectedRoute = ({ children, isAuthenticated }) => {
     return <Navigate to="/login" replace />;
   }
   return children;
-};
-
-// Login Page Component
-const LoginPage = ({ handleGoogleLogin }) => {
-  return (
-    <div className="flex h-screen bg-bg-deep items-center justify-center text-slate-200">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-accent-gold mb-8">NYAY SAHAYAK</h1>
-        <Login />
-        <button
-          onClick={handleGoogleLogin}
-          className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-full text-white font-bold transition-all"
-        >
-          Login with Google
-        </button>
-      </div>
-    </div>
-  );
 };
 
 function App() {
@@ -239,7 +221,7 @@ function App() {
             isAuthenticated ? (
               <Navigate to="/app" replace />
             ) : (
-              <LoginPage handleGoogleLogin={handleGoogleLogin} />
+              <AuthPage handleGoogleLogin={handleGoogleLogin} />
             )
           }
         />

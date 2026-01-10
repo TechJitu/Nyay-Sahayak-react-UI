@@ -5,7 +5,6 @@ const GovServices = () => {
   const [filter, setFilter] = useState('all'); // 'all', 'complaint', 'service', 'legal'
 
   const services = [
-    // --- 🚨 COMPLAINTS (SHIKAYAT) ---
     {
       title: "Cyber Crime Portal",
       desc: "Report online financial fraud, hacking, and social media harassment anonymously.",
@@ -42,7 +41,7 @@ const GovServices = () => {
       category: "complaint"
     },
 
-    // --- 📄 SERVICES (SUVIDHA) ---
+
     {
       title: "e-Courts Services",
       desc: "Check Case Status, Court Orders, Judgments, and Hearing Dates for any court.",
@@ -86,7 +85,7 @@ const GovServices = () => {
       category: "service"
     },
 
-    // --- ⚖️ LEGAL HELP (SAHAYATA) ---
+
     {
       title: "Tele-Law Service",
       desc: "Get free legal advice through video conferencing with expert lawyers.",
@@ -111,8 +110,8 @@ const GovServices = () => {
   ];
 
   // Filtering Logic
-  const filteredServices = filter === 'all' 
-    ? services 
+  const filteredServices = filter === 'all'
+    ? services
     : services.filter(s => s.category === filter);
 
   return (
@@ -125,25 +124,24 @@ const GovServices = () => {
         <p className="text-slate-400">One-stop portal for all Indian Government Legal & Citizen Services.</p>
       </div>
 
-      {/* 🔥 FILTER BUTTONS */}
+      {/* FILTER BUTTONS */}
       <div className="flex flex-wrap gap-3 mb-8 justify-center md:justify-start">
         {[
-            { id: 'all', label: 'All Portals', icon: <Globe size={16} /> },
-            { id: 'complaint', label: 'File Complaint', icon: <AlertTriangle size={16} /> },
-            { id: 'service', label: 'Citizen Services', icon: <FileText size={16} /> },
-            { id: 'legal', label: 'Legal Aid', icon: <Users size={16} /> }
+          { id: 'all', label: 'All Portals', icon: <Globe size={16} /> },
+          { id: 'complaint', label: 'File Complaint', icon: <AlertTriangle size={16} /> },
+          { id: 'service', label: 'Citizen Services', icon: <FileText size={16} /> },
+          { id: 'legal', label: 'Legal Aid', icon: <Users size={16} /> }
         ].map((btn) => (
-            <button
-                key={btn.id}
-                onClick={() => setFilter(btn.id)}
-                className={`flex items-center gap-2 px-5 py-2 rounded-full border transition-all font-medium ${
-                    filter === btn.id 
-                    ? 'bg-accent-gold text-black border-accent-gold shadow-[0_0_15px_rgba(255,215,0,0.4)]' 
-                    : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
-                }`}
-            >
-                {btn.icon} {btn.label}
-            </button>
+          <button
+            key={btn.id}
+            onClick={() => setFilter(btn.id)}
+            className={`flex items-center gap-2 px-5 py-2 rounded-full border transition-all font-medium ${filter === btn.id
+                ? 'bg-accent-gold text-black border-accent-gold shadow-[0_0_15px_rgba(255,215,0,0.4)]'
+                : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
+              }`}
+          >
+            {btn.icon} {btn.label}
+          </button>
         ))}
       </div>
 
@@ -151,29 +149,28 @@ const GovServices = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
         {filteredServices.map((service, index) => (
           <div key={index} className="glass-panel p-6 rounded-2xl border border-white/10 hover:border-accent-gold/50 transition-all hover:bg-white/5 group relative overflow-hidden flex flex-col">
-            
+
             {/* Glow Effect */}
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            
+
             <div className="flex items-start justify-between mb-4">
-                <div className="bg-black/40 w-16 h-16 rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform shadow-lg">
-                  {service.icon}
-                </div>
-                <div className={`text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-wider ${
-                    service.category === 'complaint' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
-                    service.category === 'service' ? 'text-blue-400 border-blue-500/30 bg-blue-500/10' :
+              <div className="bg-black/40 w-16 h-16 rounded-2xl flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform shadow-lg">
+                {service.icon}
+              </div>
+              <div className={`text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-wider ${service.category === 'complaint' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
+                  service.category === 'service' ? 'text-blue-400 border-blue-500/30 bg-blue-500/10' :
                     'text-purple-400 border-purple-500/30 bg-purple-500/10'
                 }`}>
-                    {service.category === 'complaint' ? 'Report' : service.category === 'service' ? 'Service' : 'Help'}
-                </div>
+                {service.category === 'complaint' ? 'Report' : service.category === 'service' ? 'Service' : 'Help'}
+              </div>
             </div>
-            
+
             <h3 className="text-lg font-bold text-slate-100 mb-2 group-hover:text-accent-gold transition-colors">{service.title}</h3>
             <p className="text-slate-400 text-sm mb-6 flex-1 leading-relaxed">{service.desc}</p>
-            
-            <a 
-              href={service.url} 
-              target="_blank" 
+
+            <a
+              href={service.url}
+              target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-white/5 hover:bg-accent-gold hover:text-black font-bold transition-all border border-white/10 mt-auto"
             >

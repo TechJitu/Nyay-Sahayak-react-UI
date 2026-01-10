@@ -26,7 +26,7 @@ export const useLegalAI = () => {
       return data;
     } catch (err) {
       setError("Server Offline");
-      return { answer: "⚠️ Connection Lost. Is the backend running?", status: "error" };
+      return { answer: "Connection Lost. Is the backend running?", status: "error" };
     } finally {
       setLoading(false);
     }
@@ -58,7 +58,7 @@ export const useLegalAI = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ voice_input: voiceInput })
       });
-      if(response.ok) return await response.blob();
+      if (response.ok) return await response.blob();
       throw new Error("Failed");
     } finally {
       setLoading(false);
@@ -73,7 +73,7 @@ export const useLegalAI = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
       });
-      if(response.ok) return await response.blob();
+      if (response.ok) return await response.blob();
       throw new Error("Failed");
     } finally {
       setLoading(false);
@@ -91,19 +91,19 @@ export const useLegalAI = () => {
       });
       return await response.json();
     } catch (err) {
-      return { answer: "⚠️ Vision Analysis Failed." };
+      return { answer: "Vision Analysis Failed." };
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
-  return { 
-    sendMessage, 
-    analyzeDossier, 
-    generateLegalNotice, 
+  return {
+    sendMessage,
+    analyzeDossier,
+    generateLegalNotice,
     generateRentAgreement,
     analyzeFIR,
-    loading, 
-    error 
+    loading,
+    error
   };
 };

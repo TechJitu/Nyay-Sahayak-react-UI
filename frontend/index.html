@@ -1,12 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nyay Sahayak AI - Legal Command Center</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<html lang="en" class="dark">
+
+<head>
+  <script>
+    // Initialize dark mode before page renders
+    const theme = localStorage.getItem('theme') || 'dark';
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+    localStorage.setItem('theme', theme);
+  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nyay Sahayak AI - Legal Command Center</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>
