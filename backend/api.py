@@ -287,3 +287,128 @@ async def handle_key(Digits: str = Form(...)):
 async def process_speech(RecordingUrl: str = Form(...)):
     print(f"🎤 Voice Recorded URL: {RecordingUrl}")
     return Response(content=str(VoiceResponse().say("We received your query.")), media_type="application/xml")
+
+# ==========================================
+# 🕵️‍♂️ NEW FEATURE: INTERACTIVE FILE REPORT (CROSS QUESTIONING)
+# ==========================================
+
+# 1. Naya Data Model banayenge taaki purani chat history yaad rahe
+class ReportChatRequest(BaseModel):
+    user_input: str  # Jo user abhi bolega
+    history: str = "" # Pichli baatein (Example: "User: Chain snatching hui.\nAI: Kab hui?")
+
+@app.post("/file-report-interview")
+async def file_report_interview(data: ReportChatRequest):
+    """
+    Yeh endpoint user se ek-ek karke sawal puchega jab tak puri detail na mil jaye.
+    """
+    
+    # System Prompt: Isme hum AI ko batayenge ki woh Police Officer hai
+    system_instruction = """
+    ACT AS: An experienced, empathetic Police Officer (S.H.O) in India.
+    GOAL: Gather details for an FIR (First Information Report) from the user.
+    
+    RULES:
+    1. Ask ONLY ONE question at a time. Do not overwhelm the user.
+    2. Step-by-step gather: 
+       - Incident Type (if not known)
+       - Date & Time
+       - Exact Location
+       - Description of Incident/Suspect
+       - Any Witnesses
+    3. If the user answers, acknowledge it briefly and ask the next missing detail.
+    4. Speak in Hinglish (Mix of Hindi & English) to make the user comfortable.
+    5. Once you have ALL details (Who, When, Where, What, How), say exactly: "REPORT_COLLECTED: Here is your summary..." and show the summary.
+    """
+
+    # AI ke liye pura context tayyar kar rahe hain
+    full_prompt = f"""
+    {system_instruction}
+
+    --- CONVERSATION HISTORY ---
+    {data.history}
+
+    --- CURRENT USER INPUT ---
+    User: {data.user_input}
+
+    --- YOUR RESPONSE (Next Question or Summary) ---
+    AI:
+    """
+
+    try:
+        if not draft_llm:
+            return {"answer": "⚠️ AI System Offline. Please check API Keys."}
+            
+        # AI se response generate karwao
+        res = draft_llm.invoke(full_prompt)
+        ai_response = res.content
+        
+        return {
+            "answer": ai_response,
+            "status": "active" if "REPORT_COLLECTED" not in ai_response else "completed"
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
+    # app.py ke imports mein yeh hona chahiye
+import shutil # File save karne ke liye
+
+# ... (Baki code same rahega) ...
+
+# ==========================================
+# 🎤 NEW: WHATSAPP STYLE VOICE MESSAGE
+# ==========================================
+
+@app.post("/voice-message")
+async def voice_message(file: UploadFile = File(...), history: str = Form(...)):
+    print(f"🎤 Receiving Voice Note: {file.filename}")
+    
+    try:
+        # 1. Audio File ko Temp Save karo
+        temp_filename = f"temp_{file.filename}"
+        with open(temp_filename, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # 2. Groq Whisper se Transcribe karo (Audio -> Text)
+        with open(temp_filename, "rb") as audio_file:
+            transcription = draft_llm.client.audio.transcriptions.create(
+                file=(temp_filename, audio_file.read()),
+                model="distil-whisper-large-v3-en", # Super fast model
+                response_format="json",
+                language="en", # Hinglish ko English script mein hi best pakadta hai
+                temperature=0.0
+            )
+        
+        user_text = transcription.text
+        print(f"🗣️ Transcribed Text: {user_text}")
+
+        # 3. Ab purana Interview Logic ya Chat Logic use karo
+        # Agar Report Mode hai toh History use karo
+        system_instruction = """
+        ACT AS: Police Officer. 
+        TASK: The user sent a voice note. Process it and ask the next question or summarize.
+        Keep answers short and conversational.
+        """
+        
+        full_prompt = f"""
+        {system_instruction}
+        --- HISTORY ---
+        {history}
+        --- USER VOICE NOTE TRANSCRIPT ---
+        User: {user_text}
+        """
+        
+        res = draft_llm.invoke(full_prompt)
+        ai_response = res.content
+
+        # 4. Temp file delete kar do (Cleanup)
+        os.remove(temp_filename)
+
+        return {
+            "user_text": user_text, # Frontend ko dikhane ke liye ki kya record hua
+            "answer": ai_response
+        }
+
+    except Exception as e:
+        print(f"❌ Voice Error: {e}")
+        return {"answer": "Awaaz saaf nahi aayi, kripya dobara bolein.", "user_text": "Error"}
