@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Outfit:wght@300;400;500;600&family=Rajdhani:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Outfit:wght@300;400;500;600&family=Rajdhani:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,41 +7,88 @@
 @layer base {
   body {
     @apply bg-bg-deep text-slate-200 font-body overflow-hidden;
-    background-image: 
-        linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
+    background-image:
+      linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-bg-panel backdrop-blur-xl border border-glass-border shadow-[0_0_30px_rgba(0,242,255,0.05)];
+    @apply bg-bg-panel backdrop-blur-xl border border-glass-border;
+    box-shadow: 0 0 30px rgba(0, 242, 255, 0.05);
   }
-  
+
   .nav-btn {
     @apply relative overflow-hidden transition-all duration-300 border-r-2 border-transparent hover:bg-white/5;
   }
-  
+
   .nav-btn-active {
     @apply bg-gradient-to-r from-accent-cyan/10 to-transparent border-r-accent-cyan text-accent-cyan;
     text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
   }
 
   .action-btn {
-    @apply bg-gradient-to-br from-accent-gold to-yellow-700 text-black font-bold uppercase tracking-widest shadow-[0_0_15px_rgba(212,175,55,0.3)] transition-all hover:scale-105;
+    @apply bg-gradient-to-br from-accent-gold to-yellow-700 text-black font-bold uppercase tracking-widest transition-all hover:scale-105;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
   }
 
   .input-console {
-    @apply bg-bg-deep border-t border-accent-gold shadow-[0_-10px_40px_rgba(0,0,0,0.8)];
+    @apply bg-bg-deep border-t border-accent-gold;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.8);
   }
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { @apply bg-slate-800 rounded; }
-::-webkit-scrollbar-thumb:hover { @apply bg-accent-cyan; }
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-accent-cyan;
+}
+
+/* Wave Animation for Voice Visualizer */
+.wave-bar {
+  width: 6px;
+  background-color: #FFD600;
+  border-radius: 9999px;
+  animation: wave 1s ease-in-out infinite;
+}
+
+.wave-bar:nth-child(1) {
+  animation-delay: 0.1s;
+  height: 40%;
+}
+
+.wave-bar:nth-child(2) {
+  animation-delay: 0.2s;
+  height: 80%;
+}
+
+.wave-bar:nth-child(3) {
+  animation-delay: 0.3s;
+  height: 50%;
+}
+
+.wave-bar:nth-child(4) {
+  animation-delay: 0.4s;
+  height: 90%;
+}
+
+.wave-bar:nth-child(5) {
+  animation-delay: 0.2s;
+  height: 60%;
+}
 
 /* Emergency Mode */
 .emergency-mode {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Menu } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
@@ -9,10 +10,140 @@ import Login from './components/Login';
 import GovServices from './components/GovServices';
 import LegalTools from './components/LegalTools';
 import LegalKavach from './components/LegalKavach';
+import HomePage from './pages/HomePage';
 import { useLegalAI } from './hooks/useLegalAI';
 import { auth, provider, db } from './firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+
+// Protected Route Wrapper
+const ProtectedRoute = ({ children, isAuthenticated }) => {
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Login Page Component
+const LoginPage = ({ handleGoogleLogin }) => {
+  return (
+    <div className="flex h-screen bg-bg-deep items-center justify-center text-slate-200">
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-accent-gold mb-8">NYAY SAHAYAK</h1>
+        <Login />
+        <button
+          onClick={handleGoogleLogin}
+          className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-full text-white font-bold transition-all"
+        >
+          Login with Google
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Main App Layout for Protected Pages
+const AppLayout = ({
+  mode,
+  setMode,
+  messages,
+  setMessages,
+  handleSendMessage,
+  loading,
+  user,
+  setIsSettingsOpen,
+  isMobileMenuOpen,
+  setIsMobileMenuOpen,
+  handleNyayPatra,
+  setIsDocModalOpen,
+}) => {
+  return (
+    <div className="flex h-screen bg-bg-deep text-slate-200 font-body overflow-hidden selection:bg-accent-gold selection:text-black">
+      <div className="fixed inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(0,242,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,242,255,0.1)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+
+      <Sidebar
+        mode={mode}
+        setMode={(newMode) => {
+          setMode(newMode);
+          if (newMode !== mode) setMessages([]);
+        }}
+        user={user}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onLoadChat={(chat) => {
+          setMessages(chat.messages || []);
+          setMode(chat.mode || 'chat');
+        }}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
+
+      <main className="flex-1 relative flex flex-col h-full z-10 w-full">
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/10 sticky top-0 z-20 bg-bg-deep/80 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 text-accent-gold hover:bg-white/10 rounded-lg"
+            >
+              <Menu size={24} />
+            </button>
+            <span className="font-legal font-bold text-accent-gold tracking-wider">
+              NYAY SAHAYAK
+            </span>
+          </div>
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-accent-gold/50">
+            {user.photo ? (
+              <img src={user.photo} alt="User" referrerPolicy="no-referrer" />
+            ) : (
+              <div className="bg-slate-700 w-full h-full flex items-center justify-center text-xs">
+                {user.name[0]}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Route-based Content */}
+        <Routes>
+          <Route
+            path="/chat"
+            element={
+              <ChatInterface
+                messages={messages}
+                setMessages={setMessages}
+                onSendMessage={handleSendMessage}
+                loading={loading}
+                role={user.role}
+                user={user}
+                onNyayPatra={handleNyayPatra}
+                onDocGen={() => setIsDocModalOpen(true)}
+                mode={mode}
+                voiceAssistantEnabled={user.voiceAssistantEnabled}
+              />
+            }
+          />
+          <Route path="/gov-services" element={<GovServices />} />
+          <Route path="/legal-tools" element={<LegalTools />} />
+          <Route path="/legal-kavach" element={<LegalKavach />} />
+          <Route path="/report" element={
+            <ChatInterface
+              messages={messages}
+              setMessages={setMessages}
+              onSendMessage={handleSendMessage}
+              loading={loading}
+              role={user.role}
+              user={user}
+              onNyayPatra={handleNyayPatra}
+              onDocGen={() => setIsDocModalOpen(true)}
+              mode={mode}
+              voiceAssistantEnabled={user.voiceAssistantEnabled}
+            />
+          } />
+          <Route path="*" element={<Navigate to="/chat" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+};
 
 function App() {
   const [booted, setBooted] = useState(false);
@@ -42,7 +173,7 @@ function App() {
       language: "Hinglish",
       detailLevel: "Detailed",
       state: "India (General)",
-      voiceAssistantEnabled: true  // Enable voice assistant by default
+      voiceAssistantEnabled: true
     };
   });
 
@@ -84,18 +215,13 @@ function App() {
     setIsAuthenticated(false);
   };
 
-  // ⚡ UPDATED: Handle Send Message with Streaming & Report Logic
   const handleSendMessage = async (text, isKavach = false) => {
-    // 1. Add User Message
     const newMessages = [...messages, { sender: 'user', text }];
     setMessages(newMessages);
 
-    // Check Mode
     if (mode === 'report') {
-      // --- POLICE REPORT MODE (Text Input) ---
       setReportLoading(true);
       try {
-        // We use file-report-interview for text inputs
         const response = await fetch("http://127.0.0.1:8000/file-report-interview", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -119,15 +245,12 @@ function App() {
       setReportLoading(false);
     }
     else {
-      // --- LIVE STREAMING CHAT MODE (Groq Llama-3) ---
       setIsStreaming(true);
-
-      // Add Placeholder AI Message
       setMessages(prev => [...prev, { sender: 'ai', text: "" }]);
       let fullAiResponse = "";
 
       try {
-        let bodyContent = { message: text, history: reportHistory }; // Reusing reportHistory as generic context
+        let bodyContent = { message: text, history: reportHistory };
         if (isKavach) {
           bodyContent.message = "EMERGENCY: " + text;
         }
@@ -140,7 +263,6 @@ function App() {
 
         if (!response.body) throw new Error("No response body");
 
-        // ⚡ Initialize Reader for Streaming
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let done = false;
@@ -151,11 +273,9 @@ function App() {
           const chunkValue = decoder.decode(value, { stream: true });
           fullAiResponse += chunkValue;
 
-          // Live Update UI
           setMessages(prev => {
             const updated = [...prev];
             const lastMsgIndex = updated.length - 1;
-            // Ensure we are updating the AI message
             if (updated[lastMsgIndex].sender === 'ai') {
               updated[lastMsgIndex] = { ...updated[lastMsgIndex], text: fullAiResponse };
             }
@@ -163,14 +283,12 @@ function App() {
           });
         }
 
-        // Speak response if in Kavach Mode
         if (isKavach) {
           const u = new SpeechSynthesisUtterance(fullAiResponse);
           u.rate = 1.1;
           window.speechSynthesis.speak(u);
         }
 
-        // Save completed chat to Firebase
         saveChatToFirebase([...newMessages, { sender: 'ai', text: fullAiResponse }]);
 
       } catch (error) {
@@ -224,84 +342,49 @@ function App() {
 
   if (!booted) return <BootScreen onComplete={() => setBooted(true)} />;
 
-  if (!isAuthenticated) {
-    return (
-      <div className="flex h-screen bg-bg-deep items-center justify-center text-slate-200">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-accent-gold mb-8">NYAY SAHAYAK</h1>
-          <Login />
-          <button
-            onClick={handleGoogleLogin}
-            className="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-full text-white font-bold transition-all"
-          >
-            Login with Google
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="flex h-screen bg-bg-deep text-slate-200 font-body overflow-hidden selection:bg-accent-gold selection:text-black">
-      <div className="fixed inset-0 pointer-events-none opacity-20 bg-[linear-gradient(rgba(0,242,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(0,242,255,0.1)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+    <Router>
+      <Routes>
+        {/* Public Route - Landing Page */}
+        <Route path="/" element={<HomePage />} />
 
-      <Sidebar
-        mode={mode}
-        setMode={(newMode) => {
-          setMode(newMode);
-          if (newMode !== mode) setMessages([]);
-        }}
-        user={user}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onLoadChat={(chat) => {
-          setMessages(chat.messages || []);
-          setMode(chat.mode || 'chat');
-        }}
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-      />
+        {/* Login Page */}
+        <Route
+          path="/login"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/chat" replace />
+            ) : (
+              <LoginPage handleGoogleLogin={handleGoogleLogin} />
+            )
+          }
+        />
 
-      <main className="flex-1 relative flex flex-col h-full z-10 w-full">
+        {/* Protected Routes */}
+        <Route
+          path="/*"
+          element={
+            <ProtectedRoute isAuthenticated={isAuthenticated}>
+              <AppLayout
+                mode={mode}
+                setMode={setMode}
+                messages={messages}
+                setMessages={setMessages}
+                handleSendMessage={handleSendMessage}
+                loading={loading}
+                user={user}
+                setIsSettingsOpen={setIsSettingsOpen}
+                isMobileMenuOpen={isMobileMenuOpen}
+                setIsMobileMenuOpen={setIsMobileMenuOpen}
+                handleNyayPatra={handleNyayPatra}
+                setIsDocModalOpen={setIsDocModalOpen}
+              />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
 
-        {/* Mobile Header */}
-        <div className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/10 sticky top-0 z-20 bg-bg-deep/80 backdrop-blur-md">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 text-accent-gold hover:bg-white/10 rounded-lg"
-            >
-              <Menu size={24} />
-            </button>
-            <span className="font-legal font-bold text-accent-gold tracking-wider">NYAY SAHAYAK</span>
-          </div>
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-accent-gold/50">
-            {user.photo ? <img src={user.photo} alt="User" referrerPolicy="no-referrer" /> : <div className="bg-slate-700 w-full h-full flex items-center justify-center text-xs">{user.name[0]}</div>}
-          </div>
-        </div>
-
-        {/* 🔥 UPDATED RENDER LOGIC: Include all Features */}
-        {mode === 'digital' ? (
-          <GovServices />
-        ) : mode === 'tools' ? (
-          <LegalTools />
-        ) : mode === 'kavach' ? (
-          <LegalKavach />
-        ) : (
-          <ChatInterface
-            messages={messages}
-            setMessages={setMessages}
-            onSendMessage={handleSendMessage}
-            loading={loading}
-            role={user.role}
-            user={user}
-            onNyayPatra={handleNyayPatra}
-            onDocGen={() => setIsDocModalOpen(true)}
-            mode={mode}
-            voiceAssistantEnabled={user.voiceAssistantEnabled}
-          />
-        )}
-      </main>
-
+      {/* Modals */}
       {isSettingsOpen && (
         <SettingsModal
           user={user}
@@ -310,8 +393,13 @@ function App() {
           onLogout={handleLogout}
         />
       )}
-      {isDocModalOpen && <DocGenModal onGenerate={generateRentAgreement} onClose={() => setIsDocModalOpen(false)} />}
-    </div>
+      {isDocModalOpen && (
+        <DocGenModal
+          onGenerate={generateRentAgreement}
+          onClose={() => setIsDocModalOpen(false)}
+        />
+      )}
+    </Router>
   );
 }
 
