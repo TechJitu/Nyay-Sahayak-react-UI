@@ -1,56 +1,20 @@
 import React, { useEffect, useState } from 'react';
-<<<<<<< HEAD
-import { useNavigate, useLocation } from 'react-router-dom';
-import { MessageSquare, FileText, Shield, Settings, History, ChevronRight, Globe, X, ShieldAlert, Calculator, ChevronLeft } from 'lucide-react';
+import { MessageSquare, Shield, Settings, History, ChevronRight, Globe, X, ChevronLeft } from 'lucide-react';
 import { db, auth } from '../firebase';
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
 const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onClose }) => {
-    const navigate = useNavigate();
-    const location = useLocation();
     const [history, setHistory] = useState([]);
     const [isCollapsed, setIsCollapsed] = useState(false);
 
     const getInitials = (name) => {
         return name && name.length > 0 ? name.charAt(0).toUpperCase() : "U";
-=======
-import { MessageSquare, Shield, Settings, History, ChevronRight, Globe, X, ChevronLeft } from 'lucide-react';
-import { db, auth } from '../firebase'; 
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore'; 
-
-const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onClose }) => {
-  const [history, setHistory] = useState([]);
-  const [isCollapsed, setIsCollapsed] = useState(false); // ✅ Desktop Collapse State
-  
-  const getInitials = (name) => {
-    return name && name.length > 0 ? name.charAt(0).toUpperCase() : "U";
-  };
-  
-  useEffect(() => {
-    const fetchHistory = async () => {
-      // ✅ Security Check: Ensure user is logged in before querying
-      if (!auth.currentUser) return;
-      
-      try {
-        const q = query(
-            collection(db, "chats"), 
-            where("userId", "==", auth.currentUser.email), 
-                orderBy("timestamp", "desc")
-        );
-        const querySnapshot = await getDocs(q);
-        const chats = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setHistory(chats);
-      } catch (error) { 
-          console.log("History Error:", error); 
-      }
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
     };
 
     useEffect(() => {
         const fetchHistory = async () => {
             if (!auth.currentUser) return;
 
-<<<<<<< HEAD
             try {
                 const q = query(
                     collection(db, "chats"),
@@ -64,42 +28,16 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
                 console.log("History Error:", error);
             }
         };
-=======
-  // 🔥 REMOVED: Kavach, Draft Documents, and Nyaya Tools
-  const menuItems = [
-    { id: 'chat', label: 'Legal Assistant', icon: <MessageSquare size={20} /> },
-    { id: 'report', label: 'File Report (FIR)', icon: <Shield size={20} /> },
-    { id: 'digital', label: 'E-Legal Seva', icon: <Globe size={20} /> },
-  ];
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 
         if (auth.currentUser) fetchHistory();
-    }, [location.pathname, user]);
+    }, [mode, user]);
 
+    // Simplified menu items
     const menuItems = [
-        { id: 'chat', label: 'Legal Assistant', icon: <MessageSquare size={20} />, path: '/chat' },
-        { id: 'kavach', label: 'KAVACH (Emergency)', icon: <ShieldAlert size={20} className="text-red-500 animate-pulse" />, path: '/legal-kavach' },
-        { id: 'draft', label: 'Draft Documents', icon: <FileText size={20} />, path: '/legal-tools' },
-        { id: 'report', label: 'File Report (FIR)', icon: <Shield size={20} />, path: '/report' },
-        { id: 'tools', label: 'Nyaya Tools', icon: <Calculator size={20} />, path: '/legal-tools' },
-        { id: 'digital', label: 'E-Legal Seva', icon: <Globe size={20} />, path: '/gov-services' },
+        { id: 'chat', label: 'Legal Assistant', icon: <MessageSquare size={20} /> },
+        { id: 'report', label: 'File Report (FIR)', icon: <Shield size={20} /> },
+        { id: 'digital', label: 'E-Legal Seva', icon: <Globe size={20} /> },
     ];
-
-    // Determine active menu item based on current path
-    const getActiveId = () => {
-        const currentPath = location.pathname;
-        const activeItem = menuItems.find(item => item.path === currentPath);
-        return activeItem ? activeItem.id : 'chat';
-    };
-
-    const activeId = getActiveId();
-
-    // Update mode when route changes (for backward compatibility)
-    useEffect(() => {
-        if (setMode && activeId) {
-            setMode(activeId);
-        }
-    }, [activeId, setMode]);
 
     // Dynamic Classes based on Collapse
     const sidebarClasses = `
@@ -156,8 +94,8 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
                     {menuItems.map((item) => (
                         <button
                             key={item.id}
-                            onClick={() => { navigate(item.path); onClose(); }}
-                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${activeId === item.id ? 'bg-accent-gold text-black shadow-lg font-bold' : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                            onClick={() => { setMode(item.id); onClose(); }}
+                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-300 ${mode === item.id ? 'bg-accent-gold text-black shadow-lg font-bold' : 'text-slate-400 hover:bg-white/5 hover:text-white'
                                 } ${isCollapsed ? 'justify-center' : ''}`}
                             title={isCollapsed ? item.label : ''}
                         >

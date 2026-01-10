@@ -7,12 +7,6 @@ import BootScreen from './components/BootScreen';
 import SettingsModal from './components/Modals/SettingsModal';
 import Login from './components/Login';
 import GovServices from './components/GovServices';
-<<<<<<< HEAD
-import LegalTools from './components/LegalTools';
-import LegalKavach from './components/LegalKavach';
-import HomePage from './pages/HomePage';
-=======
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 import { useLegalAI } from './hooks/useLegalAI';
 import { auth, provider, db } from './firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
@@ -216,12 +210,8 @@ function App() {
     setIsAuthenticated(false);
   };
 
-<<<<<<< HEAD
-  const handleSendMessage = async (text, isKavach = false) => {
-=======
   const handleSendMessage = async (text) => {
     // 1. Add User Message
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
     const newMessages = [...messages, { sender: 'user', text }];
     setMessages(newMessages);
 
@@ -256,14 +246,7 @@ function App() {
       let fullAiResponse = "";
 
       try {
-<<<<<<< HEAD
-        let bodyContent = { message: text, history: reportHistory };
-        if (isKavach) {
-          bodyContent.message = "EMERGENCY: " + text;
-        }
-=======
         let bodyContent = { message: text, history: reportHistory }; 
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 
         const response = await fetch("http://127.0.0.1:8000/stream-chat", {
           method: "POST",
@@ -293,16 +276,7 @@ function App() {
           });
         }
 
-<<<<<<< HEAD
-        if (isKavach) {
-          const u = new SpeechSynthesisUtterance(fullAiResponse);
-          u.rate = 1.1;
-          window.speechSynthesis.speak(u);
-        }
-
-=======
         // Save completed chat to Firebase
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
         saveChatToFirebase([...newMessages, { sender: 'ai', text: fullAiResponse }]);
 
       } catch (error) {
@@ -374,31 +348,6 @@ function App() {
           }
         />
 
-<<<<<<< HEAD
-        {/* Protected Routes */}
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute isAuthenticated={isAuthenticated}>
-              <AppLayout
-                mode={mode}
-                setMode={setMode}
-                messages={messages}
-                setMessages={setMessages}
-                handleSendMessage={handleSendMessage}
-                loading={loading}
-                user={user}
-                setIsSettingsOpen={setIsSettingsOpen}
-                isMobileMenuOpen={isMobileMenuOpen}
-                setIsMobileMenuOpen={setIsMobileMenuOpen}
-                handleNyayPatra={handleNyayPatra}
-                setIsDocModalOpen={setIsDocModalOpen}
-              />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-=======
       <main className="flex-1 relative flex flex-col h-full z-10 w-full">
 
         {/* Mobile Header */}
@@ -435,7 +384,6 @@ function App() {
           />
         )}
       </main>
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 
       {/* Modals */}
       {isSettingsOpen && (
@@ -446,18 +394,8 @@ function App() {
           onLogout={handleLogout}
         />
       )}
-<<<<<<< HEAD
-      {isDocModalOpen && (
-        <DocGenModal
-          onGenerate={generateRentAgreement}
-          onClose={() => setIsDocModalOpen(false)}
-        />
-      )}
-    </Router>
-=======
       {/* DocGenModal Removed */}
     </div>
->>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
   );
 }
 
