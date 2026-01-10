@@ -1,113 +1,136 @@
-import React, { useState } from 'react';
-import { X, Sliders } from 'lucide-react';
+import React from 'react';
+import { X, Save, LogOut, User, MapPin, Globe, Shield } from 'lucide-react';
 
-const SettingsModal = ({ user, setUser, onClose }) => {
-  const [formData, setFormData] = useState(user);
-
+const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
+  
+  // Handle Input Change
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSave = () => {
-    setUser(formData);
-    onClose();
+    setUser({ ...user, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-fade-in">
-      <div className="glass-panel w-[700px] p-8 rounded-2xl transform scale-100 transition-all">
-        <div className="flex justify-between items-center mb-8 pb-4 border-b border-white/10">
-          <h2 className="text-xl font-bold font-legal text-accent-gold tracking-widest flex items-center gap-3">
-            <Sliders className="w-6 h-6" /> SYSTEM CONFIG
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-bg-deep border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+        
+        {/* Header */}
+        <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
+          <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2">
+            <User className="text-accent-gold" /> Profile Settings
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition">
-            <X className="w-6 h-6" />
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+            <X size={24} />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-accent-cyan mb-2">Identity</label>
-              <input 
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Enter Name" 
-                className="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-accent-cyan focus:outline-none transition"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-accent-cyan mb-2">Role / Access</label>
-              <select 
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-accent-cyan outline-none"
-              >
-                <option value="Citizen">Citizen (Public Access)</option>
-                <option value="Advocate">Advocate (Pro Tools)</option>
-                <option value="Student">Student (Learning Mode)</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-accent-gold mb-2">Jurisdiction</label>
-              <select 
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                className="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-accent-gold outline-none custom-scrollbar"
-              >
-                <option value="India (General)">🇮🇳 India (Central Laws)</option>
-                <optgroup label="States" className="text-accent-gold bg-black font-bold">
-                    <option value="Maharashtra">Maharashtra</option>
-                    <option value="Delhi">Delhi (NCR)</option>
-                    <option value="Uttar Pradesh">Uttar Pradesh</option>
-                    <option value="Karnataka">Karnataka</option>
-                    <option value="West Bengal">West Bengal</option>
-                    <option value="Gujarat">Gujarat</option>
-                    <option value="Rajasthan">Rajasthan</option>
-                    <option value="Punjab">Punjab</option>
-                    <option value="Tamil Nadu">Tamil Nadu</option>
-                </optgroup>
-              </select>
+        {/* Body */}
+        <div className="p-6 space-y-4">
+          
+          {/* Photo/Avatar */}
+          <div className="flex justify-center mb-6">
+            <div className="w-24 h-24 rounded-full border-4 border-accent-gold/20 p-1">
+                 {user.photo ? (
+                    <img src={user.photo} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                 ) : (
+                    <div className="w-full h-full bg-slate-700 rounded-full flex items-center justify-center text-3xl font-bold text-slate-400">
+                        {user.name[0]}
+                    </div>
+                 )}
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-accent-cyan mb-2">Language</label>
-              <select 
-                name="language"
-                value={formData.language}
-                onChange={handleChange}
-                className="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-accent-cyan outline-none"
-              >
-                <option value="Hinglish">Hinglish (Default)</option>
-                <option value="English">English (Formal)</option>
-                <option value="Hindi">Hindi (हिंदी)</option>
-                <option value="Marathi">Marathi (मराठी)</option>
-              </select>
+          {/* Name Input */}
+          <div className="space-y-1">
+            <label className="text-xs text-slate-400 uppercase font-bold tracking-wider">Full Name</label>
+            <input 
+              type="text" 
+              name="name" 
+              value={user.name} 
+              onChange={handleChange}
+              className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-slate-200 focus:border-accent-gold outline-none transition-all"
+            />
+          </div>
+
+          {/* Role Selection */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+                <label className="text-xs text-slate-400 uppercase font-bold tracking-wider flex items-center gap-1">
+                    <Shield size={12} /> Role
+                </label>
+                <select 
+                  name="role" 
+                  value={user.role} 
+                  onChange={handleChange}
+                  className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-slate-200 focus:border-accent-gold outline-none"
+                >
+                  <option value="Citizen">Citizen</option>
+                  <option value="Advocate">Advocate</option>
+                  <option value="Police">Police Officer</option>
+                  <option value="Student">Law Student</option>
+                </select>
             </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-widest text-accent-cyan mb-2">Response Style</label>
-              <select 
-                name="detailLevel"
-                value={formData.detailLevel}
-                onChange={handleChange}
-                className="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-accent-cyan outline-none"
-              >
-                <option value="Detailed">Detailed Explanation</option>
-                <option value="Concise">Short & Precise</option>
-              </select>
+
+            <div className="space-y-1">
+                <label className="text-xs text-slate-400 uppercase font-bold tracking-wider flex items-center gap-1">
+                    <Globe size={12} /> Language
+                </label>
+                <select 
+                  name="language" 
+                  value={user.language} 
+                  onChange={handleChange}
+                  className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-slate-200 focus:border-accent-gold outline-none"
+                >
+                  <option value="Hinglish">Hinglish</option>
+                  <option value="Hindi">Hindi</option>
+                  <option value="English">English</option>
+                  <option value="Marathi">Marathi</option>
+                </select>
             </div>
           </div>
+
+           {/* State Selection */}
+           <div className="space-y-1">
+            <label className="text-xs text-slate-400 uppercase font-bold tracking-wider flex items-center gap-1">
+                <MapPin size={12} /> Location (State Laws)
+            </label>
+            <select 
+              name="state" 
+              value={user.state} 
+              onChange={handleChange}
+              className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-slate-200 focus:border-accent-gold outline-none"
+            >
+              <option value="India (General)">India (General Central Laws)</option>
+              <option value="Maharashtra">Maharashtra</option>
+              <option value="Delhi">Delhi</option>
+              <option value="Karnataka">Karnataka</option>
+              <option value="Uttar Pradesh">Uttar Pradesh</option>
+            </select>
+          </div>
+
         </div>
 
-        <button onClick={handleSave} className="w-full py-4 action-btn rounded-xl mt-8 text-sm tracking-widest shadow-lg">
-          APPLY SETTINGS & REBOOT
-        </button>
+        {/* Footer with Actions */}
+        <div className="p-6 border-t border-white/10 bg-white/5 flex justify-between items-center gap-4">
+          
+          {/* 🔴 LOGOUT BUTTON (Updated: No Popup) */}
+          <button 
+            onClick={() => {
+                onLogout(); // Seedha Logout
+                onClose();
+            }} 
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/20 transition-all font-medium text-sm"
+          >
+            <LogOut size={16} /> Log Out
+          </button>
+
+          {/* Save Button */}
+          <button 
+            onClick={onClose} 
+            className="flex items-center gap-2 px-6 py-2 rounded-lg bg-accent-gold text-black font-bold hover:shadow-[0_0_15px_rgba(255,215,0,0.4)] transition-all"
+          >
+            <Save size={18} /> Save Profile
+          </button>
+        </div>
+
       </div>
     </div>
   );

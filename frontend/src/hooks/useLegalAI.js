@@ -80,11 +80,29 @@ export const useLegalAI = () => {
     }
   };
 
+  const analyzeFIR = async (file) => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await fetch(`${API_URL}/analyze-fir`, {
+        method: 'POST',
+        body: formData
+      });
+      return await response.json();
+    } catch (err) {
+      return { answer: "⚠️ Vision Analysis Failed." };
+    } finally {
+        setLoading(false);
+    }
+  };
+
   return { 
     sendMessage, 
     analyzeDossier, 
     generateLegalNotice, 
-    generateRentAgreement, 
+    generateRentAgreement,
+    analyzeFIR,
     loading, 
     error 
   };

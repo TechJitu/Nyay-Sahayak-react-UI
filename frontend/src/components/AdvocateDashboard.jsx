@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Upload, Clock, FolderOpen, AlertTriangle, FileText } from 'lucide-react';
-import { useLegalAI } from '../hooks/useLegalAI'; // <-- Corrected path to hooks folder
+import { Upload, Clock, FolderOpen, AlertTriangle, FileText, Crosshair } from 'lucide-react';
+import { useLegalAI } from '../hooks/useLegalAI';
 
 const AdvocateDashboard = () => {
   const { analyzeDossier, loading } = useLegalAI();
@@ -41,7 +41,7 @@ const AdvocateDashboard = () => {
           <p className="text-xs text-accent-cyan mt-1 font-mono tracking-widest">{data.case_details}</p>
         </div>
         <button className="px-6 py-3 bg-red-600/20 border border-red-500 text-white rounded text-xs font-bold uppercase tracking-widest hover:bg-red-600 transition flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4" /> Deep Scan
+          <Crosshair className="w-4 h-4" /> Deep Scan
         </button>
       </div>
 

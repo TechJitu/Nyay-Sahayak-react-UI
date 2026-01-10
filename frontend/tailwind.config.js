@@ -10,11 +10,13 @@ export default {
         bg: {
           deep: '#020408',
           panel: 'rgba(10, 20, 35, 0.85)',
+          input: '#0f172a',
         },
         accent: {
           gold: '#FFD700',
           cyan: '#00F3FF',
           danger: '#FF2A2A',
+          success: '#00FF9D',
         },
         glass: {
           border: 'rgba(0, 242, 255, 0.2)',
@@ -29,6 +31,7 @@ export default {
         'red-pulse': 'red-pulse 2s infinite',
         'scan': 'scan 3s linear infinite',
         'fade-in': 'fadeIn 0.5s ease-out',
+        'spin-slow': 'spin 10s linear infinite',
       },
       keyframes: {
         'red-pulse': {
