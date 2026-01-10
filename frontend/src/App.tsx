@@ -4,11 +4,8 @@ import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
 import BootScreen from './components/BootScreen';
 import SettingsModal from './components/Modals/SettingsModal';
-import DocGenModal from './components/Modals/DocGenModal';
 import Login from './components/Login';
 import GovServices from './components/GovServices';
-import LegalTools from './components/LegalTools';
-import LegalKavach from './components/LegalKavach';
 import { useLegalAI } from './hooks/useLegalAI';
 import { auth, provider, db } from './firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
@@ -19,7 +16,6 @@ function App() {
   const [mode, setMode] = useState('chat');
   const [messages, setMessages] = useState([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Mobile Menu State
@@ -42,11 +38,11 @@ function App() {
       language: "Hinglish",
       detailLevel: "Detailed",
       state: "India (General)",
-      voiceAssistantEnabled: true  // Enable voice assistant by default
+      voiceAssistantEnabled: true
     };
   });
 
-  const { generateLegalNotice, generateRentAgreement } = useLegalAI();
+  const { generateLegalNotice } = useLegalAI(); // Removed generateRentAgreement
   const loading = reportLoading || isStreaming;
 
   useEffect(() => {
@@ -84,8 +80,7 @@ function App() {
     setIsAuthenticated(false);
   };
 
-  // ⚡ UPDATED: Handle Send Message with Streaming & Report Logic
-  const handleSendMessage = async (text, isKavach = false) => {
+  const handleSendMessage = async (text) => {
     // 1. Add User Message
     const newMessages = [...messages, { sender: 'user', text }];
     setMessages(newMessages);
@@ -95,7 +90,6 @@ function App() {
       // --- POLICE REPORT MODE (Text Input) ---
       setReportLoading(true);
       try {
-        // We use file-report-interview for text inputs
         const response = await fetch("http://127.0.0.1:8000/file-report-interview", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -127,10 +121,7 @@ function App() {
       let fullAiResponse = "";
 
       try {
-        let bodyContent = { message: text, history: reportHistory }; // Reusing reportHistory as generic context
-        if (isKavach) {
-          bodyContent.message = "EMERGENCY: " + text;
-        }
+        let bodyContent = { message: text, history: reportHistory }; 
 
         const response = await fetch("http://127.0.0.1:8000/stream-chat", {
           method: "POST",
@@ -155,19 +146,11 @@ function App() {
           setMessages(prev => {
             const updated = [...prev];
             const lastMsgIndex = updated.length - 1;
-            // Ensure we are updating the AI message
             if (updated[lastMsgIndex].sender === 'ai') {
               updated[lastMsgIndex] = { ...updated[lastMsgIndex], text: fullAiResponse };
             }
             return updated;
           });
-        }
-
-        // Speak response if in Kavach Mode
-        if (isKavach) {
-          const u = new SpeechSynthesisUtterance(fullAiResponse);
-          u.rate = 1.1;
-          window.speechSynthesis.speak(u);
         }
 
         // Save completed chat to Firebase
@@ -279,13 +262,9 @@ function App() {
           </div>
         </div>
 
-        {/* 🔥 UPDATED RENDER LOGIC: Include all Features */}
+        {/* 🔥 UPDATED RENDER LOGIC: Kavach, Tools, Drafts Removed */}
         {mode === 'digital' ? (
           <GovServices />
-        ) : mode === 'tools' ? (
-          <LegalTools />
-        ) : mode === 'kavach' ? (
-          <LegalKavach />
         ) : (
           <ChatInterface
             messages={messages}
@@ -295,7 +274,7 @@ function App() {
             role={user.role}
             user={user}
             onNyayPatra={handleNyayPatra}
-            onDocGen={() => setIsDocModalOpen(true)}
+            // onDocGen removed
             mode={mode}
             voiceAssistantEnabled={user.voiceAssistantEnabled}
           />
@@ -310,7 +289,7 @@ function App() {
           onLogout={handleLogout}
         />
       )}
-      {isDocModalOpen && <DocGenModal onGenerate={generateRentAgreement} onClose={() => setIsDocModalOpen(false)} />}
+      {/* DocGenModal Removed */}
     </div>
   );
 }

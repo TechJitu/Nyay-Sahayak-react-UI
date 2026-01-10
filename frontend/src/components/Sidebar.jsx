@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MessageSquare, FileText, Shield, Settings, History, ChevronRight, Globe, X, ShieldAlert, Calculator, ChevronLeft } from 'lucide-react';
+import { MessageSquare, Shield, Settings, History, ChevronRight, Globe, X, ChevronLeft } from 'lucide-react';
 import { db, auth } from '../firebase'; 
 import { collection, query, where, getDocs, orderBy } from 'firebase/firestore'; 
 
@@ -20,7 +20,7 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
         const q = query(
             collection(db, "chats"), 
             where("userId", "==", auth.currentUser.email), 
-            orderBy("timestamp", "desc")
+                orderBy("timestamp", "desc")
         );
         const querySnapshot = await getDocs(q);
         const chats = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -34,12 +34,10 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
     if (auth.currentUser) fetchHistory();
   }, [mode, user]); 
 
+  // 🔥 REMOVED: Kavach, Draft Documents, and Nyaya Tools
   const menuItems = [
     { id: 'chat', label: 'Legal Assistant', icon: <MessageSquare size={20} /> },
-    { id: 'kavach', label: 'KAVACH (Emergency)', icon: <ShieldAlert size={20} className="text-red-500 animate-pulse" /> },
-    { id: 'draft', label: 'Draft Documents', icon: <FileText size={20} /> },
     { id: 'report', label: 'File Report (FIR)', icon: <Shield size={20} /> },
-    { id: 'tools', label: 'Nyaya Tools', icon: <Calculator size={20} /> },
     { id: 'digital', label: 'E-Legal Seva', icon: <Globe size={20} /> },
   ];
 
