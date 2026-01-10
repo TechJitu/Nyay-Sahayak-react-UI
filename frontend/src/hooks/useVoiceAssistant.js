@@ -31,7 +31,8 @@ export const useVoiceAssistant = (enabled = true, onCommand) => {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = 'en-IN'; // English (India) for better Hindi-English mix
+        // Support multiple languages - Hindi, English, and Hinglish
+        recognition.lang = 'hi-IN'; // Hindi with English fallback
 
         recognition.onstart = () => {
             setIsListening(true);
@@ -89,23 +90,35 @@ export const useVoiceAssistant = (enabled = true, onCommand) => {
     const handleFinalTranscript = useCallback((text) => {
         const lowerText = text.toLowerCase();
 
-        // Wake word detection
+        // Wake word detection with multiple variations
         if (isWaitingForWakeWord.current) {
-            if (lowerText.includes('hey sahayak') || lowerText.includes('hi sahayak') ||
-                lowerText.includes('hey sahayak') || lowerText.includes('hi sahayak')) {
+            const wakeWords = [
+                'hey sahayak', 'hi sahayak', 'hello sahayak',
+                'okay sahayak', 'ok sahayak', 'sahayak',
+                'hey saahaayak', 'hi saahaayak', 'hello saahaayak'
+            ];
+
+            const foundWakeWord = wakeWords.find(word => lowerText.includes(word));
+
+            if (foundWakeWord) {
                 // Wake word detected!
+                console.log('Wake word detected:', foundWakeWord);
                 isWaitingForWakeWord.current = false;
                 setIsProcessing(true);
 
                 // Extract command after wake word
-                const command = text.replace(/hey sahayak|hi sahayak/gi, '').trim();
+                let command = text;
+                wakeWords.forEach(word => {
+                    command = command.replace(new RegExp(word, 'gi'), '').trim();
+                });
 
-                if (command) {
+                if (command && command.length > 2) {
+                    console.log('Immediate command:', command);
                     processCommand(command);
                 } else {
                     // Just activated, wait for next speech
                     setIsProcessing(false);
-                    setTranscript('Listening...');
+                    setTranscript('I\'m listening...');
                 }
             }
             return;
@@ -119,37 +132,42 @@ export const useVoiceAssistant = (enabled = true, onCommand) => {
     // Process voice commands
     const processCommand = useCallback((command) => {
         const lowerCommand = command.toLowerCase();
+        console.log('Processing command:', command);
 
         // Built-in commands
-        if (lowerCommand.includes('stop listening') || lowerCommand.includes('stop')) {
+        if (lowerCommand.includes('stop listening') || lowerCommand === 'stop' || lowerCommand === 'ruk jao') {
             stopListening();
             onCommand?.({ type: 'stop', text: command });
             return;
         }
 
-        if (lowerCommand.includes('clear chat') || lowerCommand.includes('clear messages')) {
+        if (lowerCommand.includes('clear chat') || lowerCommand.includes('clear messages') || lowerCommand.includes('chat delete')) {
             onCommand?.({ type: 'clear', text: command });
             resetToWakeWord();
             return;
         }
 
-        if (lowerCommand.includes('send message') || lowerCommand.includes('search')) {
-            const query = command.replace(/send message|search/gi, '').trim();
+        if (lowerCommand.startsWith('send message') || lowerCommand.startsWith('search for')) {
+            const query = command.replace(/send message|search for|search/gi, '').trim();
             onCommand?.({ type: 'send', text: query || command });
             resetToWakeWord();
             return;
         }
 
-        // Default: treat as query
+        // Default: treat everything else as a query to the AI
+        console.log('Sending as query:', command);
         onCommand?.({ type: 'query', text: command });
-        resetToWakeWord();
+        // Don't reset to wake word - stay in active listening mode
+        setIsProcessing(false);
+        setTranscript('Listening...');
     }, [onCommand]);
 
-    // Reset to wake word listening
+    // Reset to ready state (continue listening without wake word)
     const resetToWakeWord = useCallback(() => {
-        isWaitingForWakeWord.current = true;
+        // Keep listening active for continuous conversation
+        isWaitingForWakeWord.current = false;
         setIsProcessing(false);
-        setTranscript('');
+        setTranscript('Listening...');
     }, []);
 
     // Start listening
@@ -165,7 +183,11 @@ export const useVoiceAssistant = (enabled = true, onCommand) => {
 
         if (recognitionRef.current && !isListening) {
             try {
-                isWaitingForWakeWord.current = true;
+                // When manually activated via button, skip wake word requirement
+                // User can speak their query immediately
+                isWaitingForWakeWord.current = false;
+                setTranscript('Listening... speak now');
+                console.log('Voice assistant started - ready for query');
                 recognitionRef.current.start();
             } catch (error) {
                 console.error('Error starting recognition:', error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Mic, Paperclip, Volume2, VolumeX, User, Trash2 } from 'lucide-react';
+import { Send, Mic, Volume2, VolumeX, User, Trash2, Copy, Check } from 'lucide-react';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 import VoiceAssistantButton from './VoiceAssistantButton';
 import VoiceWaveform from './VoiceWaveform';
@@ -7,6 +7,29 @@ import VoiceWaveform from './VoiceWaveform';
 const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, user, onNyayPatra, onDocGen, mode, voiceAssistantEnabled = true }) => {
   const [input, setInput] = useState('');
   const [reportHistory, setReportHistory] = useState("");
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
+  // Copy message to clipboard
+  const copyToClipboard = (text, index) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    });
+  };
+
+  // Format message with markdown (convert **text** to bold)
+  const formatMessage = (text) => {
+    if (!text) return null;
+    // Split by **bold** pattern
+    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        // Remove ** and wrap in bold
+        return <strong key={i} className="font-semibold text-accent-gold">{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
+  };
 
   const [greeting, setGreeting] = useState("Good Morning");
 
@@ -90,9 +113,9 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const bottomRef = useRef(null);
-  const lastMessageCountRef = useRef(0);
 
   const handleVoiceCommand = (command) => {
+    console.log('Voice Command Received:', command); // Debug log
     switch (command.type) {
       case 'stop': break;
       case 'clear':
@@ -101,12 +124,20 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
         break;
       case 'send':
       case 'query':
-        if (command.text) {
-          setInput(command.text);
-          setTimeout(() => handleSend(command.text), 500);
+        if (command.text && command.text.trim()) {
+          const queryText = command.text.trim();
+          console.log('Processing voice query:', queryText); // Debug log
+          setInput(queryText);
+          // Immediately send the message
+          handleSend(queryText);
         }
         break;
-      default: break;
+      default:
+        // For any unrecognized command, treat as query
+        if (command.text && command.text.trim()) {
+          handleSend(command.text.trim());
+        }
+        break;
     }
   };
 
@@ -116,48 +147,101 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading, isRecording]);
 
-  useEffect(() => {
-    const previousCount = lastMessageCountRef.current;
-    const currentCount = messages.length;
+  // Track when AI finishes responding to speak the response
+  const [wasLoading, setWasLoading] = useState(false);
 
-    if (!voiceAssistantEnabled || currentCount <= previousCount || currentCount !== previousCount + 1) {
-      lastMessageCountRef.current = currentCount;
+  useEffect(() => {
+    // Track loading state changes
+    if (loading) {
+      setWasLoading(true);
+    }
+
+    // When loading finishes and we have messages
+    if (!loading && wasLoading && messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage && lastMessage.sender === 'ai' && lastMessage.text && !isMuted && voiceAssistantEnabled) {
+        console.log('AI finished, speaking response:', lastMessage.text.substring(0, 50) + '...');
+        // Small delay to ensure response is complete
+        setTimeout(() => {
+          speakText(lastMessage.text, true);
+        }, 500);
+      }
+      setWasLoading(false);
+    }
+  }, [loading, messages, voiceAssistantEnabled, isMuted]);
+
+  const speakText = (text, autoPlay = false) => {
+    if (!window.speechSynthesis || isMuted) {
+      console.log('Speech synthesis not available or muted');
       return;
     }
 
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.sender === 'ai' && lastMessage.text && !loading) {
-      setTimeout(() => {
-        speakText(lastMessage.text, true);
-      }, 300);
-    }
-    lastMessageCountRef.current = currentCount;
-  }, [messages, voiceAssistantEnabled, loading]);
-
-  const speakText = (text, autoPlay = false) => {
-    if (!window.speechSynthesis || isMuted) return;
+    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    let selectedVoice = null;
-    const languageMap = {
-      'Hindi': ['hi-IN', 'Hindi', 'हिन्दी'],
-      'Hinglish': ['en-IN', 'India', 'Indian'],
-      'English': ['en-IN', 'en-US', 'en-GB', 'English'],
-      'Marathi': ['mr-IN', 'Marathi', 'मराठी']
+
+    const speak = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      const voices = window.speechSynthesis.getVoices();
+
+      console.log('Available voices:', voices.length);
+
+      let selectedVoice = null;
+
+      // Prioritize Indian voices
+      if (voices.length > 0) {
+        // Try to find Indian English voice first
+        selectedVoice = voices.find(v => v.lang === 'en-IN');
+
+        // Then try Hindi
+        if (!selectedVoice) {
+          selectedVoice = voices.find(v => v.lang === 'hi-IN');
+        }
+
+        // Then try any voice with India in name
+        if (!selectedVoice) {
+          selectedVoice = voices.find(v =>
+            v.name.toLowerCase().includes('india') ||
+            v.name.toLowerCase().includes('hindi') ||
+            v.lang.includes('IN')
+          );
+        }
+
+        // Fallback to first voice
+        if (!selectedVoice) {
+          selectedVoice = voices[0];
+        }
+      }
+
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        console.log('Speaking with voice:', selectedVoice.name, selectedVoice.lang);
+      } else {
+        console.log('Using default voice');
+      }
+
+      utterance.rate = 0.95;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      utterance.onstart = () => console.log('Speech started');
+      utterance.onend = () => console.log('Speech ended');
+      utterance.onerror = (e) => console.error('Speech error:', e);
+
+      window.speechSynthesis.speak(utterance);
     };
-    const searchTerms = languageMap[user?.language] || languageMap['Hinglish'];
-    for (const term of searchTerms) {
-      selectedVoice = voices.find(v => v.lang === term || v.lang.startsWith(term) || v.name.includes(term));
-      if (selectedVoice) break;
+
+    // Voices might not be loaded yet, wait for them
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length > 0) {
+      speak();
+    } else {
+      // Wait for voices to load
+      window.speechSynthesis.onvoiceschanged = () => {
+        speak();
+      };
+      // Fallback: try after a short delay
+      setTimeout(speak, 100);
     }
-    if (!selectedVoice) {
-      selectedVoice = voices.find(v => v.lang.includes('IN') || v.name.includes('India')) || voices[0];
-    }
-    if (selectedVoice) utterance.voice = selectedVoice;
-    utterance.rate = (user?.language === 'Hindi' || user?.language === 'Marathi') ? 0.9 : 1.0;
-    utterance.pitch = 1.0;
-    window.speechSynthesis.speak(utterance);
   };
 
   const toggleMute = () => {
@@ -167,10 +251,14 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     });
   };
 
+  // Load voices on component mount
   useEffect(() => {
     if (window.speechSynthesis) {
+      // Trigger voice loading
+      window.speechSynthesis.getVoices();
       window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
+        const voices = window.speechSynthesis.getVoices();
+        console.log('Voices loaded:', voices.length);
       };
     }
   }, []);
@@ -364,11 +452,22 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
                 <Volume2 size={14} />
               </button>
             )}
-            <div className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-2xl backdrop-blur-md border shadow-lg text-sm md:text-base ${msg.sender === 'user'
+            <div className={`max-w-[85%] md:max-w-[80%] p-3 md:p-4 rounded-2xl backdrop-blur-md border shadow-lg text-sm md:text-base relative ${msg.sender === 'user'
               ? 'bg-gradient-to-br from-blue-600/40 to-purple-600/40 border-blue-400/30 text-white rounded-tr-none'
               : mode === 'report' ? 'bg-red-900/20 border-red-500/30 text-red-100 rounded-tl-none' : 'glass-panel border-white/10 text-slate-200 rounded-tl-none'
               }`}>
-              <p className="whitespace-pre-wrap leading-relaxed">{msg.text}</p>
+              <p className="whitespace-pre-wrap leading-relaxed">{formatMessage(msg.text)}</p>
+
+              {/* Copy Button for AI messages */}
+              {msg.sender === 'ai' && msg.text && (
+                <button
+                  onClick={() => copyToClipboard(msg.text, idx)}
+                  className="absolute top-2 right-2 p-1.5 rounded-md bg-white/5 hover:bg-accent-gold text-slate-400 hover:text-black opacity-0 group-hover:opacity-100 transition-all"
+                  title="Copy to clipboard"
+                >
+                  {copiedIndex === idx ? <Check size={14} className="text-green-400" /> : <Copy size={14} />}
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -391,55 +490,34 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       {/* Input Area */}
       <div className="p-3 md:p-4 glass-panel border-t border-white/10 shrink-0">
         <div className="flex items-end gap-2 max-w-5xl mx-auto">
-          {voiceAssistantEnabled && voiceAssistant.isSupported && (
-            <VoiceAssistantButton
-              isListening={voiceAssistant.isListening}
-              isProcessing={voiceAssistant.isProcessing}
-              onClick={voiceAssistant.toggleListening}
-              disabled={loading || isRecording}
-            />
-          )}
-
-          <button className="hidden md:block p-3 hover:bg-white/10 rounded-full text-accent-gold transition-colors">
-            <Paperclip size={20} />
-          </button>
-
+          {/* Input Field with Send Button Inside */}
           <div className="flex-1 relative bg-black/40 border border-white/10 focus-within:border-accent-gold rounded-xl transition-all overflow-hidden">
-            {isRecording ? (
-              <div className="absolute inset-0 bg-red-900/90 flex items-center justify-between px-4 z-20 animate-in fade-in slide-in-from-bottom-2">
-                <div className="flex items-center gap-3">
-                  <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                  </span>
-                  <span className="text-white font-mono font-bold tracking-widest">{formatTime(recordingTime)}</span>
-                </div>
-                <div className="flex items-center gap-4">
-                  <span className="text-red-200 text-xs animate-pulse">Recording...</span>
-                  <button onClick={cancelRecording} className="p-2 bg-white/10 rounded-full hover:bg-white/20 text-white">
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
             <textarea
               rows={1}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              placeholder={mode === 'report' ? "Type details..." : "Type query..."}
-              className="w-full bg-transparent border-none rounded-xl py-3 pl-3 pr-10 text-slate-200 placeholder-slate-500 focus:ring-0 resize-none max-h-32 min-h-[48px]"
-              style={{ paddingRight: '40px' }}
+              placeholder={mode === 'report' ? "Type your complaint..." : "Type your legal query..."}
+              className="w-full bg-transparent border-none rounded-xl py-3 pl-4 pr-12 text-slate-200 placeholder-slate-500 focus:ring-0 resize-none max-h-32 min-h-[48px]"
             />
+            {/* Send Button Inside Input */}
+            <button
+              onClick={() => input.trim() && handleSend()}
+              disabled={!input.trim()}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${input.trim() ? (mode === 'report' ? 'bg-red-500 hover:bg-red-600' : 'bg-accent-gold hover:bg-yellow-500') : 'bg-white/10'} text-black disabled:text-slate-500`}
+            >
+              <Send size={18} />
+            </button>
           </div>
 
-          {isRecording ? (
-            <button onClick={stopAndSendRecording} className="p-3 rounded-xl shadow-[0_0_20px_red] bg-red-600 text-white font-bold h-[48px] w-[48px] flex items-center justify-center animate-pulse"><Send size={24} /></button>
-          ) : (
-            <button onClick={() => input.trim() ? handleSend() : startRecording()} className={`p-3 rounded-xl transition-all shadow-lg flex items-center justify-center shrink-0 ${mode === 'report' ? 'bg-gradient-to-r from-red-600 to-orange-600' : 'bg-gradient-to-r from-accent-gold to-yellow-600'} text-black font-bold h-[48px] w-[48px]`}>
-              {input.trim() ? <Send size={20} /> : <Mic size={24} />}
-            </button>
+          {/* Voice Assistant Button */}
+          {voiceAssistantEnabled && voiceAssistant.isSupported && (
+            <VoiceAssistantButton
+              isListening={voiceAssistant.isListening}
+              isProcessing={voiceAssistant.isProcessing}
+              onClick={voiceAssistant.toggleListening}
+              disabled={loading}
+            />
           )}
         </div>
       </div>

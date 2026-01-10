@@ -125,7 +125,12 @@ function App() {
       let fullAiResponse = "";
 
       try {
-        let bodyContent = { message: text, history: reportHistory };
+        // Build conversation history from all messages
+        const conversationHistory = messages.map(msg =>
+          `${msg.sender === 'user' ? 'User' : 'AI'}: ${msg.text}`
+        ).join('\n');
+
+        let bodyContent = { message: text, history: conversationHistory };
 
         const response = await fetch("http://127.0.0.1:8000/stream-chat", {
           method: "POST",

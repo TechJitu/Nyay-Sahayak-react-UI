@@ -12,9 +12,8 @@ sentence-transformers
 pypdf
 fpdf
 python-docx
-twilio
 python-dotenv
 requests
 tf-keras
 PyPDF2
-google-generativeai
+groq

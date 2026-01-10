@@ -4,33 +4,28 @@ import io
 import json
 import shutil
 import chromadb
-# Google imports removed
 from chromadb.utils import embedding_functions
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Response
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_groq import ChatGroq
-from groq import Groq # ✅ Import Groq Client for Audio
-from twilio.rest import Client
-from twilio.twiml.voice_response import VoiceResponse, Gather
+from groq import Groq
 from fpdf import FPDF
 from docx import Document
 import PyPDF2
-#import speech_recognition as sr
-#import pyttsx3
 import requests
 import time
 
 # ==========================================
-# 👇 API KEYS
+# API KEYS (Use Environment Variables)
 # ==========================================
-GROQ_API_KEY = "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" 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
-TWILIO_SID = "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
-TWILIO_AUTH_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 
-TWILIO_PHONE_NUMBER = "+12765798633" 
-VERIFIED_FRIENDS = ["+918976021711"] 
+if not GROQ_API_KEY:
+    print("WARNING: GROQ_API_KEY not set! Please set it as an environment variable.")
+    print("Run: set GROQ_API_KEY=your_api_key_here (Windows)")
+    print("Or:  export GROQ_API_KEY=your_api_key_here (Linux/Mac)") 
 
 app = FastAPI(title="Nyay Sahayak API", version="Final Hackathon Edition")
 
@@ -42,38 +37,37 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- 🧠 DATABASE SETUP ---
+# --- DATABASE SETUP ---
 try:
     chroma_client = chromadb.PersistentClient(path="./nyay_memory") 
     sentence_transformer_ef = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
     vector_db = chroma_client.get_or_create_collection(name="legal_cases", embedding_function=sentence_transformer_ef)
-    print("✅ Database Connected!")
+    print("Database Connected!")
 except Exception as e:
-    print(f"⚠️ Database Error: {e}")
+    print(f"Database Error: {e}")
     vector_db = None
 
-# --- 🤖 AI MODEL SETUP (GROQ ONLY) ---
+# --- AI MODEL SETUP (GROQ ONLY) ---
 try:
-    # 1. For Chat/Text Generation
-    draft_llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile", temperature=0.3)
-    vision_llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.2-11b-vision-preview", temperature=0)
-    
-    # 2. For Audio/Whisper (Direct Client)
-    groq_client = Groq(api_key=GROQ_API_KEY)
-    
-    print("✅ Groq Models Ready!")
+    if GROQ_API_KEY:
+        # 1. For Chat/Text Generation
+        draft_llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.3-70b-versatile", temperature=0.3)
+        vision_llm = ChatGroq(groq_api_key=GROQ_API_KEY, model_name="llama-3.2-11b-vision-preview", temperature=0)
+        
+        # 2. For Audio/Whisper (Direct Client)
+        groq_client = Groq(api_key=GROQ_API_KEY)
+        
+        print("✅ Groq Models Ready!")
+    else:
+        draft_llm = None
+        vision_llm = None
+        groq_client = None
+        print("Groq models not initialized - API key missing")
 except Exception as e:
-    print(f"❌ Model Error: {e}")
+    print(f"Model Error: {e}")
     draft_llm = None
     vision_llm = None
     groq_client = None
-
-try:
-    twilio_client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
-    print("✅ Twilio Client Ready!")
-except:
-    twilio_client = None
-    print("⚠️ Twilio Credentials Missing or Wrong")
 
 # --- DATA MODELS ---
 class UserQuery(BaseModel):
@@ -104,11 +98,31 @@ class ReportChatRequest(BaseModel):
     history: str = ""
 
 # ==========================================
-# ⚡ LIVE STREAMING CHAT (GROQ LLAMA-3)
+# LIVE STREAMING CHAT (GROQ LLAMA-3)
 # ==========================================
 
 async def generate_live_response(message, history):
-    system_prompt = "You are Nyay Sahayak, an AI Legal Assistant for Indians. Provide accurate, helpful legal advice in Hinglish. Keep it conversational but professional."
+    system_prompt = """You are Nyay Sahayak, an AI Legal Assistant for Indians. Provide accurate, helpful legal advice.
+
+CRITICAL LANGUAGE RULES:
+1. DETECT the language of the user's message.
+2. Respond ENTIRELY in the SAME language - no mixing!
+3. If English query → respond FULLY in English (use 1, 2, 3 for numbers)
+4. If Hindi query → respond FULLY in Hindi (use १, २, ३ for numbers)
+5. If Hinglish query → respond in Hinglish style
+
+EXAMPLES:
+- "How to file FIR?" → Full English response with 1, 2, 3
+- "FIR कैसे file करें?" → Full Hindi response with १, २, ३
+- "Mujhe help chahiye" → Hinglish response
+
+RESPONSE FORMAT:
+- Use **bold** for headings and important terms
+- Use numbered lists for steps
+- Structure with clear sections
+- End with a helpful follow-up question
+
+Keep responses professional, clear, and FULLY in the detected language."""
     full_prompt = f"{system_prompt}\n\nCONVERSATION HISTORY:\n{history}\n\nUSER: {message}\nAI:"
     
     try:
@@ -116,7 +130,6 @@ async def generate_live_response(message, history):
             yield "⚠️ Groq API Key missing or invalid."
             return
 
-        # ✅ Using LangChain's astream for live tokens from Groq
         async for chunk in draft_llm.astream(full_prompt):
             if chunk.content:
                 yield chunk.content
@@ -131,14 +144,21 @@ async def stream_chat(request: ChatRequest):
     )
 
 # ==========================================
-# 🕵️‍♂️ FILE REPORT INTERVIEW
+# FILE REPORT INTERVIEW
 # ==========================================
 @app.post("/file-report-interview")
 async def file_report_interview(data: ReportChatRequest):
     system_instruction = """
     ACT AS: An experienced, empathetic Police Officer (S.H.O) in India.
     GOAL: Gather details for an FIR (First Information Report).
-    RULES: Ask ONLY ONE question at a time. Step-by-step. Speak in Hinglish.
+    RULES: Ask ONLY ONE question at a time. Step-by-step.
+    
+    IMPORTANT LANGUAGE RULE: You MUST detect the language of the user's message and respond in THE SAME LANGUAGE.
+    - If user speaks in English, respond ONLY in English.
+    - If user speaks in Hindi, respond ONLY in Hindi.
+    - If user speaks in Hinglish (mixed), respond in Hinglish.
+    - Match the user's language exactly. Never switch languages unless the user does.
+    
     Once all details are gathered, say "REPORT_COLLECTED".
     """
     full_prompt = f"{system_instruction}\nHISTORY:\n{data.history}\nUser: {data.user_input}\nAI:"
@@ -152,7 +172,7 @@ async def file_report_interview(data: ReportChatRequest):
         return {"error": str(e)}
 
 # ==========================================
-# 🎤 VOICE MESSAGE (GROQ WHISPER)
+# VOICE MESSAGE (GROQ WHISPER)
 # ==========================================
 @app.post("/voice-message")
 async def voice_message(file: UploadFile = File(...), history: str = Form(default="")):
@@ -178,8 +198,16 @@ async def voice_message(file: UploadFile = File(...), history: str = Form(defaul
             )
         user_text = transcription.text
         
-        # AI Response (Short & Conversational)
-        full_prompt = f"ACT AS: Lawyer/Police. Reply in Hinglish. Keep it short and helpful.\nHISTORY:\n{history}\nUSER SAID: {user_text}"
+        # AI Response - Match user's language
+        full_prompt = f"""ACT AS: Lawyer/Police. Keep it short and helpful.
+
+IMPORTANT: Detect the language of the user's message and respond in THE SAME LANGUAGE.
+- If user spoke in English, respond in English.
+- If user spoke in Hindi, respond in Hindi.
+- If user spoke in Hinglish, respond in Hinglish.
+- Match their language exactly.
+
+HISTORY:\n{history}\nUSER SAID: {user_text}"""
         res = draft_llm.invoke(full_prompt)
         ai_response = res.content
 
@@ -190,7 +218,7 @@ async def voice_message(file: UploadFile = File(...), history: str = Form(defaul
         return {"answer": "Error processing audio.", "user_text": "Error"}
 
 # ==========================================
-# 📄 DOC GENERATORS (PDF/DOCX)
+# DOC GENERATORS (PDF/DOCX)
 # ==========================================
 @app.post("/generate-legal-notice")
 async def generate_legal_notice(data: NoticeRequest):
@@ -232,26 +260,3 @@ async def generate_rent_agreement(data: RentAgreementQuery):
         return FileResponse(path=filename, filename=filename, media_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
     except Exception as e:
         return {"error": str(e)}
-
-# ==========================================
-# 📞 TWILIO VOICE
-# ==========================================
-@app.post("/voice")
-async def voice_handler(request: Request):
-    resp = VoiceResponse()
-    gather = Gather(num_digits=1, action='/handle-key', method='POST')
-    gather.say("Welcome to Nyay Sahayak. Press 1 for Emergency.", voice='alice')
-    resp.append(gather)
-    return Response(content=str(resp), media_type="application/xml")
-
-@app.post("/handle-key")
-async def handle_key(Digits: str = Form(...)):
-    resp = VoiceResponse()
-    if Digits == '1':
-        resp.say("Alerting contacts.", voice='alice')
-        if twilio_client:
-            for friend in VERIFIED_FRIENDS:
-                try: twilio_client.messages.create(body="🚨 URGENT HELP!", from_=TWILIO_PHONE_NUMBER, to=friend)
-                except: pass
-    return Response(content=str(resp), media_type="application/xml")
-
