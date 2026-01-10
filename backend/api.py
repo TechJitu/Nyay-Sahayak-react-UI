@@ -360,55 +360,91 @@ import shutil # File save karne ke liye
 # ==========================================
 
 @app.post("/voice-message")
-async def voice_message(file: UploadFile = File(...), history: str = Form(...)):
+async def voice_message(
+    file: UploadFile = File(...), 
+    history: str = Form(default="") # 👈 CHANGE: Isse 'default=""' kar diya taaki 422 error na aaye
+):
     print(f"🎤 Receiving Voice Note: {file.filename}")
     
     try:
-        # 1. Audio File ko Temp Save karo
+        # 1. Temp File Save
         temp_filename = f"temp_{file.filename}"
         with open(temp_filename, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # 2. Groq Whisper se Transcribe karo (Audio -> Text)
+        # 2. Transcribe (Audio -> Text)
+        print("🗣️ Transcribing...")
         with open(temp_filename, "rb") as audio_file:
             transcription = draft_llm.client.audio.transcriptions.create(
                 file=(temp_filename, audio_file.read()),
-                model="distil-whisper-large-v3-en", # Super fast model
+                model="distil-whisper-large-v3-en",
                 response_format="json",
-                language="en", # Hinglish ko English script mein hi best pakadta hai
+                language="en",
                 temperature=0.0
             )
         
         user_text = transcription.text
-        print(f"🗣️ Transcribed Text: {user_text}")
+        print(f"✅ Text: {user_text}")
 
-        # 3. Ab purana Interview Logic ya Chat Logic use karo
-        # Agar Report Mode hai toh History use karo
-        system_instruction = """
-        ACT AS: Police Officer. 
-        TASK: The user sent a voice note. Process it and ask the next question or summarize.
-        Keep answers short and conversational.
-        """
-        
-        full_prompt = f"""
-        {system_instruction}
-        --- HISTORY ---
-        {history}
-        --- USER VOICE NOTE TRANSCRIPT ---
-        User: {user_text}
-        """
+        # 3. AI Response
+        system_instruction = "ACT AS: Police Officer. Reply in Hindi/Hinglish. Keep it short."
+        full_prompt = f"{system_instruction}\nHISTORY:\n{history}\nUSER SAID: {user_text}"
         
         res = draft_llm.invoke(full_prompt)
         ai_response = res.content
 
-        # 4. Temp file delete kar do (Cleanup)
+        # 4. Cleanup
         os.remove(temp_filename)
 
         return {
-            "user_text": user_text, # Frontend ko dikhane ke liye ki kya record hua
+            "user_text": user_text,
             "answer": ai_response
         }
 
     except Exception as e:
-        print(f"❌ Voice Error: {e}")
-        return {"answer": "Awaaz saaf nahi aayi, kripya dobara bolein.", "user_text": "Error"}
+        print(f"❌ Error: {e}")
+        return {"answer": "Error processing audio.", "user_text": "Error"}@app.post("/voice-message")
+async def voice_message(
+    file: UploadFile = File(...), 
+    history: str = Form(default="") # 👈 CHANGE: Isse 'default=""' kar diya taaki 422 error na aaye
+):
+    print(f"🎤 Receiving Voice Note: {file.filename}")
+    
+    try:
+        # 1. Temp File Save
+        temp_filename = f"temp_{file.filename}"
+        with open(temp_filename, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        # 2. Transcribe (Audio -> Text)
+        print("🗣️ Transcribing...")
+        with open(temp_filename, "rb") as audio_file:
+            transcription = draft_llm.client.audio.transcriptions.create(
+                file=(temp_filename, audio_file.read()),
+                model="distil-whisper-large-v3-en",
+                response_format="json",
+                language="en",
+                temperature=0.0
+            )
+        
+        user_text = transcription.text
+        print(f"✅ Text: {user_text}")
+
+        # 3. AI Response
+        system_instruction = "ACT AS: Police Officer. Reply in Hindi/Hinglish. Keep it short."
+        full_prompt = f"{system_instruction}\nHISTORY:\n{history}\nUSER SAID: {user_text}"
+        
+        res = draft_llm.invoke(full_prompt)
+        ai_response = res.content
+
+        # 4. Cleanup
+        os.remove(temp_filename)
+
+        return {
+            "user_text": user_text,
+            "answer": ai_response
+        }
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+        return {"answer": "Error processing audio.", "user_text": "Error"}
