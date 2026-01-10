@@ -13,6 +13,25 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   const [recordingTime, setRecordingTime] = useState(0);
   const [isMuted, setIsMuted] = useState(false); // 🔇 New Mute State
 
+  // ⚖️ ROTATING RIGHTS LOGIC (Added Here)
+  const [rightIndex, setRightIndex] = useState(0);
+  const rights = [
+    "Right to Information (RTI) 📄",
+    "Right to Equality ⚖️",
+    "Right to Education 📚",
+    "Right to Privacy 🔐",
+    "Right Against Exploitation 🚫",
+    "Right to Free Speech 🗣️",
+    "Right to Legal Aid 🧑‍⚖️"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRightIndex((prev) => (prev + 1) % rights.length);
+    }, 2000); // Change every 2 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
@@ -296,9 +315,16 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
             <h2 className="text-2xl md:text-4xl font-bold text-white mb-2">
               Namaste, <span className="text-accent-gold">{user?.name?.split(' ')[0] || "Citizen"}</span>! 🙏
             </h2>
-            <p className="text-slate-400 max-w-md text-sm md:text-lg px-4">
-              Main aapka AI Legal Assistant hun.
+
+            {/* 🔥 UPDATED: Rotating Rights Logic Here */}
+            <p className="text-slate-400 mt-2 text-lg font-medium max-w-lg px-4 transition-all duration-500">
+              Hello {user?.name?.split(' ')[0]}, do you know your <br />
+              <span className="text-accent-gold font-bold text-xl block md:inline mt-2 md:mt-0 animate-in fade-in slide-in-from-bottom-2 duration-500 key={rightIndex}">
+                {rights[rightIndex]}
+              </span>
+              ?
             </p>
+
           </div>
         )}
 
