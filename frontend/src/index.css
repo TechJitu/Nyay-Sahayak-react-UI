@@ -6,7 +6,7 @@
 
 @layer base {
   body {
-    @apply bg-bg-deep text-slate-200 font-body overflow-hidden;
+    @apply bg-bg-deep text-slate-200 font-body;
     background-image:
       linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
