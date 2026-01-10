@@ -4,18 +4,23 @@ import io
 import json
 import shutil
 import chromadb
+# Google imports removed
 from chromadb.utils import embedding_functions
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form, Request, Response
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_groq import ChatGroq
-from groq import Groq
+from groq import Groq # ✅ Import Groq Client for Audio
 from twilio.rest import Client
 from twilio.twiml.voice_response import VoiceResponse, Gather
 from fpdf import FPDF
 from docx import Document
 import PyPDF2
+import speech_recognition as sr
+import pyttsx3
+import requests
+import time
 
 # ==========================================
 # 👇 API KEYS
@@ -163,18 +168,18 @@ async def voice_message(file: UploadFile = File(...), history: str = Form(defaul
              return {"answer": "AI Config Error", "user_text": "Error"}
 
         with open(temp_filename, "rb") as audio_file:
-            # ✅ UPDATED MODEL NAME HERE
+            # ✅ UPDATED: Auto-Detect Language (Removed language='en')
             transcription = groq_client.audio.transcriptions.create(
                 file=(temp_filename, audio_file.read()),
-                model="whisper-large-v3", # ✅ Changed from distil-whisper-large-v3-en (Decommissioned)
+                model="whisper-large-v3", # Standard model
                 response_format="json",
-                language="en",
+                # language="en",  <-- REMOVED THIS LINE TO ALLOW HINDI
                 temperature=0.0
             )
         user_text = transcription.text
         
         # AI Response (Short & Conversational)
-        full_prompt = f"ACT AS: Lawyer/Police. Reply in Hinglish. Keep it short.\nHISTORY:\n{history}\nUSER SAID: {user_text}"
+        full_prompt = f"ACT AS: Lawyer/Police. Reply in Hinglish. Keep it short and helpful.\nHISTORY:\n{history}\nUSER SAID: {user_text}"
         res = draft_llm.invoke(full_prompt)
         ai_response = res.content
 
@@ -249,3 +254,4 @@ async def handle_key(Digits: str = Form(...)):
                 try: twilio_client.messages.create(body="🚨 URGENT HELP!", from_=TWILIO_PHONE_NUMBER, to=friend)
                 except: pass
     return Response(content=str(resp), media_type="application/xml")
+

@@ -5,12 +5,14 @@ import Sidebar from './components/Sidebar';
 import ChatInterface from './components/ChatInterface';
 import BootScreen from './components/BootScreen';
 import SettingsModal from './components/Modals/SettingsModal';
-import DocGenModal from './components/Modals/DocGenModal';
 import Login from './components/Login';
 import GovServices from './components/GovServices';
+<<<<<<< HEAD
 import LegalTools from './components/LegalTools';
 import LegalKavach from './components/LegalKavach';
 import HomePage from './pages/HomePage';
+=======
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 import { useLegalAI } from './hooks/useLegalAI';
 import { auth, provider, db } from './firebase';
 import { signInWithPopup, signOut } from 'firebase/auth';
@@ -150,7 +152,6 @@ function App() {
   const [mode, setMode] = useState('chat');
   const [messages, setMessages] = useState([]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Mobile Menu State
@@ -177,7 +178,7 @@ function App() {
     };
   });
 
-  const { generateLegalNotice, generateRentAgreement } = useLegalAI();
+  const { generateLegalNotice } = useLegalAI(); // Removed generateRentAgreement
   const loading = reportLoading || isStreaming;
 
   useEffect(() => {
@@ -215,7 +216,12 @@ function App() {
     setIsAuthenticated(false);
   };
 
+<<<<<<< HEAD
   const handleSendMessage = async (text, isKavach = false) => {
+=======
+  const handleSendMessage = async (text) => {
+    // 1. Add User Message
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
     const newMessages = [...messages, { sender: 'user', text }];
     setMessages(newMessages);
 
@@ -250,10 +256,14 @@ function App() {
       let fullAiResponse = "";
 
       try {
+<<<<<<< HEAD
         let bodyContent = { message: text, history: reportHistory };
         if (isKavach) {
           bodyContent.message = "EMERGENCY: " + text;
         }
+=======
+        let bodyContent = { message: text, history: reportHistory }; 
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 
         const response = await fetch("http://127.0.0.1:8000/stream-chat", {
           method: "POST",
@@ -283,12 +293,16 @@ function App() {
           });
         }
 
+<<<<<<< HEAD
         if (isKavach) {
           const u = new SpeechSynthesisUtterance(fullAiResponse);
           u.rate = 1.1;
           window.speechSynthesis.speak(u);
         }
 
+=======
+        // Save completed chat to Firebase
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
         saveChatToFirebase([...newMessages, { sender: 'ai', text: fullAiResponse }]);
 
       } catch (error) {
@@ -360,6 +374,7 @@ function App() {
           }
         />
 
+<<<<<<< HEAD
         {/* Protected Routes */}
         <Route
           path="/*"
@@ -383,6 +398,44 @@ function App() {
           }
         />
       </Routes>
+=======
+      <main className="flex-1 relative flex flex-col h-full z-10 w-full">
+
+        {/* Mobile Header */}
+        <div className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/10 sticky top-0 z-20 bg-bg-deep/80 backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 text-accent-gold hover:bg-white/10 rounded-lg"
+            >
+              <Menu size={24} />
+            </button>
+            <span className="font-legal font-bold text-accent-gold tracking-wider">NYAY SAHAYAK</span>
+          </div>
+          <div className="w-8 h-8 rounded-full overflow-hidden border border-accent-gold/50">
+            {user.photo ? <img src={user.photo} alt="User" referrerPolicy="no-referrer" /> : <div className="bg-slate-700 w-full h-full flex items-center justify-center text-xs">{user.name[0]}</div>}
+          </div>
+        </div>
+
+        {/* 🔥 UPDATED RENDER LOGIC: Kavach, Tools, Drafts Removed */}
+        {mode === 'digital' ? (
+          <GovServices />
+        ) : (
+          <ChatInterface
+            messages={messages}
+            setMessages={setMessages}
+            onSendMessage={handleSendMessage}
+            loading={loading}
+            role={user.role}
+            user={user}
+            onNyayPatra={handleNyayPatra}
+            // onDocGen removed
+            mode={mode}
+            voiceAssistantEnabled={user.voiceAssistantEnabled}
+          />
+        )}
+      </main>
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 
       {/* Modals */}
       {isSettingsOpen && (
@@ -393,6 +446,7 @@ function App() {
           onLogout={handleLogout}
         />
       )}
+<<<<<<< HEAD
       {isDocModalOpen && (
         <DocGenModal
           onGenerate={generateRentAgreement}
@@ -400,6 +454,10 @@ function App() {
         />
       )}
     </Router>
+=======
+      {/* DocGenModal Removed */}
+    </div>
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
   );
 }
 

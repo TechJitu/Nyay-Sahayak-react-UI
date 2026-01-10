@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+<<<<<<< HEAD
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MessageSquare, FileText, Shield, Settings, History, ChevronRight, Globe, X, ShieldAlert, Calculator, ChevronLeft } from 'lucide-react';
 import { db, auth } from '../firebase';
@@ -12,12 +13,44 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
 
     const getInitials = (name) => {
         return name && name.length > 0 ? name.charAt(0).toUpperCase() : "U";
+=======
+import { MessageSquare, Shield, Settings, History, ChevronRight, Globe, X, ChevronLeft } from 'lucide-react';
+import { db, auth } from '../firebase'; 
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore'; 
+
+const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onClose }) => {
+  const [history, setHistory] = useState([]);
+  const [isCollapsed, setIsCollapsed] = useState(false); // ✅ Desktop Collapse State
+  
+  const getInitials = (name) => {
+    return name && name.length > 0 ? name.charAt(0).toUpperCase() : "U";
+  };
+  
+  useEffect(() => {
+    const fetchHistory = async () => {
+      // ✅ Security Check: Ensure user is logged in before querying
+      if (!auth.currentUser) return;
+      
+      try {
+        const q = query(
+            collection(db, "chats"), 
+            where("userId", "==", auth.currentUser.email), 
+                orderBy("timestamp", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+        const chats = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setHistory(chats);
+      } catch (error) { 
+          console.log("History Error:", error); 
+      }
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
     };
 
     useEffect(() => {
         const fetchHistory = async () => {
             if (!auth.currentUser) return;
 
+<<<<<<< HEAD
             try {
                 const q = query(
                     collection(db, "chats"),
@@ -31,6 +64,14 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
                 console.log("History Error:", error);
             }
         };
+=======
+  // 🔥 REMOVED: Kavach, Draft Documents, and Nyaya Tools
+  const menuItems = [
+    { id: 'chat', label: 'Legal Assistant', icon: <MessageSquare size={20} /> },
+    { id: 'report', label: 'File Report (FIR)', icon: <Shield size={20} /> },
+    { id: 'digital', label: 'E-Legal Seva', icon: <Globe size={20} /> },
+  ];
+>>>>>>> f97b346bd5f1b09a3a00b62cec3353025a415131
 
         if (auth.currentUser) fetchHistory();
     }, [location.pathname, user]);
