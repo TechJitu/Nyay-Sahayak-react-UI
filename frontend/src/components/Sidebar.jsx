@@ -42,92 +42,52 @@ const Sidebar = ({ mode, setMode, user, onOpenSettings, onLoadChat, isOpen, onCl
   `;
 
   return (
-    <>
-      {/* Mobile Overlay (Dark Background when menu is open) */}
-      {isOpen && (
-        <div 
-            onClick={onClose}
-            className="fixed inset-0 bg-black/80 z-40 md:hidden backdrop-blur-sm"
-        ></div>
-      )}
-
-      <aside className={sidebarClasses}>
-        
-        {/* Header & Close Button (Mobile only) */}
-        <div className="p-6 border-b border-white/10 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent-gold to-yellow-700 flex items-center justify-center text-black font-bold text-lg overflow-hidden">
-                    {user.photo ? <img src={user.photo} alt="User" /> : user.name[0]}
-                </div>
-                <div>
-                    <h3 className="font-bold text-slate-100 truncate w-32">{user.name}</h3>
-                    <p className="text-xs text-accent-gold">{user.role}</p>
-                </div>
-            </div>
-            {/* ❌ Close Button for Mobile */}
-            <button onClick={onClose} className="md:hidden text-slate-400 hover:text-white">
-                <X size={24} />
-            </button>
+    <aside className="hidden md:flex flex-col w-72 glass-panel p-6 justify-between z-40 h-full border-r border-white/10 relative">
+      <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-accent-gold to-transparent opacity-50"></div>
+      
+      <div>
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-10 px-2">
+          <div className="relative">
+            <div className="text-3xl text-accent-gold drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]">⚖️</div>
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-accent-cyan rounded-full animate-pulse"></div>
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-[0.15em] font-legal text-white">NYAY <span className="text-accent-gold">AI</span></h1>
+            <div className="text-[9px] text-accent-cyan tracking-[0.3em] opacity-80 font-tech">COMMAND NODE</div>
+          </div>
         </div>
 
-        {/* Menu Items */}
-        <nav className="p-4 space-y-2">
-            <p className="text-xs text-slate-500 font-bold px-4 mb-2 uppercase tracking-wider">Menu</p>
-            {menuItems.map((item) => (
-            <button
-                key={item.id}
-                onClick={() => {
-                    setMode(item.id);
-                    onClose(); // Mobile pe click karne ke baad menu band ho jaye
-                }}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
-                mode === item.id 
-                    ? 'bg-accent-gold text-black shadow-[0_0_15px_rgba(255,215,0,0.4)] font-bold' 
-                    : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                }`}
-            >
-                {item.icon}
-                <span>{item.label}</span>
-            </button>
-            ))}
+        {/* User Badge */}
+        <div className="flex items-center gap-3 mb-8 p-3 rounded border border-white/10 bg-white/5">
+          <div className="w-10 h-10 rounded bg-gradient-to-tr from-accent-gold to-yellow-900 flex items-center justify-center font-bold text-black shadow-lg">
+            {getInitials(user.name)}
+          </div>
+          <div className="overflow-hidden">
+            <p className="text-[9px] text-accent-cyan uppercase tracking-wider font-bold">WELCOME BACK</p>
+            <p className="text-xs font-bold truncate text-white">{user.name || 'User'}</p>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="space-y-3 font-tech">
+          <NavButton id="chat" icon={MessageSquare} label="Legal Chat" />
+          <NavButton id="advocate" icon={Briefcase} label="Advocate's Touch" activeColor="text-accent-gold" />
+          <NavButton id="draft" icon={FilePen} label="Draft Documents" />
+          <NavButton id="report" icon={ShieldAlert} label="File Report" />
         </nav>
+      </div>
 
-        {/* History Section */}
-        <div className="flex-1 overflow-y-auto px-4 mt-4 scrollbar-hide">
-            <p className="text-xs text-slate-500 font-bold px-4 mb-2 uppercase tracking-wider flex items-center gap-2">
-                <History size={12} /> Recent Cases
-            </p>
-            <div className="space-y-1 pb-20">
-                {history.map((chat) => (
-                    <button 
-                        key={chat.id}
-                        onClick={() => {
-                            onLoadChat(chat);
-                            onClose();
-                        }} 
-                        className="w-full text-left px-4 py-2 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-lg truncate transition-all flex items-center justify-between group"
-                    >
-                        <span className="truncate w-32">{chat.title || "Untitled Case"}</span>
-                        <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-accent-gold" />
-                    </button>
-                ))}
-            </div>
+      {/* Footer */}
+      <div className="space-y-2 pt-6 border-t border-white/10">
+        <button onClick={onOpenSettings} className="w-full flex items-center gap-3 px-4 py-2 text-xs uppercase tracking-widest text-slate-500 hover:text-accent-cyan transition">
+          <Settings className="w-4 h-4" /> Config
+        </button>
+        <div className="px-4 text-[10px] text-slate-600 font-mono flex items-center gap-2">
+          SERVER STATUS: <span className="text-green-500">● ONLINE</span>
         </div>
-
-        {/* Bottom Config */}
-        <div className="absolute bottom-0 left-0 w-full p-4 border-t border-white/10 bg-black/20 backdrop-blur-md">
-            <button 
-                onClick={() => {
-                    onOpenSettings();
-                    onClose();
-                }}
-                className="w-full flex items-center justify-center gap-2 p-3 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all text-sm font-medium"
-            >
-                <Settings size={16} /> Configure Profile
-            </button>
-        </div>
-      </aside>
-    </>
+      </div>
+    </aside>
   );
 };
 

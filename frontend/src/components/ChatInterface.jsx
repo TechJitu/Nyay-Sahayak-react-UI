@@ -174,7 +174,11 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
             <div className="h-full flex flex-col items-center justify-center text-center opacity-90 mt-[-20px]">
                 <div className="w-20 h-20 md:w-24 md:h-24 rounded-full border-4 border-accent-gold/30 p-1 mb-6 shadow-[0_0_30px_rgba(255,215,0,0.2)]">
                     {user?.photo ? (
+<<<<<<< HEAD
                         <img src={user.photo} alt="User" className="w-full h-full rounded-full object-cover" />
+=======
+                        <img src={user.photo} alt="User" className="w-full h-full rounded-full object-cover" referrerPolicy="no-referrer" />
+>>>>>>> 6617ca1ac6699649832e5d5a0417d324ba869a8a
                     ) : (
                         <div className="w-full h-full bg-white/10 rounded-full flex items-center justify-center">
                             <User size={40} className="text-accent-gold" />
