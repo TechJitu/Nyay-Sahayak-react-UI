@@ -151,7 +151,7 @@ async def file_report_interview(data: ReportChatRequest):
 # ==========================================
 @app.post("/voice-message")
 async def voice_message(file: UploadFile = File(...), history: str = Form(default="")):
-    print(f"🎤 Receiving Voice Note: {file.filename}")
+    print(f"Receiving Voice Note: {file.filename}")
     try:
         temp_filename = f"temp_{file.filename}"
         with open(temp_filename, "wb") as buffer:

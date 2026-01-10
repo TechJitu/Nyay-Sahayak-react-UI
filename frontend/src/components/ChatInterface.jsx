@@ -183,7 +183,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
       const audioFile = new File([audioBlob], "voice_note.wav", { type: "audio/wav" });
 
-      setMessages(prev => [...prev, { sender: 'user', text: "🎤 Audio Sent (Processing...)" }]);
+      setMessages(prev => [...prev, { sender: 'user', text: "Audio Sent (Processing...)" }]);
 
       const formData = new FormData();
       formData.append("file", audioFile);
@@ -201,7 +201,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
         setMessages(prev => {
           const newMsgs = [...prev];
           if (newMsgs[newMsgs.length - 1].sender === 'user') {
-            newMsgs[newMsgs.length - 1].text = "🎤 " + data.user_text;
+            newMsgs[newMsgs.length - 1].text = "" + data.user_text;
           }
           return newMsgs;
         });
