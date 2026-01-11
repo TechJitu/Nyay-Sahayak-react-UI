@@ -31,8 +31,9 @@ export const useVoiceAssistant = (enabled = true, onCommand) => {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        // Support multiple languages - Hindi, English, and Hinglish
-        recognition.lang = 'hi-IN'; // Hindi with English fallback
+        // Use English-India as primary - it recognizes both English and Hinglish well
+        // Hindi words will still be recognized but transcribed in Roman script
+        recognition.lang = 'en-IN';
 
         recognition.onstart = () => {
             setIsListening(true);
