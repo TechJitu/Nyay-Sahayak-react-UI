@@ -232,6 +232,11 @@ function App() {
           }
         />
 
+        {/* Chat Route - Redirect based on auth */}
+        <Route path="/chat" element={
+          isAuthenticated ? <Navigate to="/app" replace /> : <Navigate to="/login" replace />
+        } />
+
         {/* Protected App Route */}
         <Route
           path="/app"
