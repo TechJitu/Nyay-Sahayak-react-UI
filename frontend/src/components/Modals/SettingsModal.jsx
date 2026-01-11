@@ -1,19 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { X, Save, LogOut, User, MapPin, Globe, Shield, Mic, Sun, Moon } from 'lucide-react';
 
-const SettingsModal = ({ user, setUser, onClose, onLogout }) => {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('theme') || 'dark';
-  });
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+const SettingsModal = ({ user, setUser, onClose, onLogout, theme, setTheme }) => {
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });

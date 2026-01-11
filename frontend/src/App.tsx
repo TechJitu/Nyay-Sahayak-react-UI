@@ -321,6 +321,8 @@ function App() {
                     setUser={setUser}
                     onClose={() => setIsSettingsOpen(false)}
                     onLogout={handleLogout}
+                    theme={theme}
+                    setTheme={setTheme}
                   />
                 )}
               </div>
