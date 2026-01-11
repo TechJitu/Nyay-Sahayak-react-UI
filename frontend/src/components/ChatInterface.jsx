@@ -403,14 +403,6 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
   return (
     <div className="flex flex-col h-full bg-transparent relative">
 
-      <button
-        onClick={toggleMute}
-        className="absolute top-4 right-4 z-20 p-2 rounded-full bg-black/40 border border-white/10 text-white hover:bg-white/10 transition-all shadow-lg backdrop-blur-md"
-        title={isMuted ? "Unmute Voice" : "Mute Voice"}
-      >
-        {isMuted ? <VolumeX size={20} className="text-red-400" /> : <Volume2 size={20} className="text-accent-gold" />}
-      </button>
-
       <div className="absolute top-0 left-0 right-0 z-10 flex justify-center p-2 pointer-events-none">
         {mode === 'report' ? (
           <div className="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-1 rounded-full text-[10px] md:text-xs font-bold backdrop-blur-md shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-pulse">
@@ -558,8 +550,8 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
                   setIsMuted(!isMuted);
                 }}
                 className={`p-2 md:p-2.5 rounded-full transition-all ${isMuted
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                    : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10'
+                  ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                  : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10'
                   }`}
                 title={isMuted ? 'Unmute AI Voice' : 'Mute AI Voice'}
               >
