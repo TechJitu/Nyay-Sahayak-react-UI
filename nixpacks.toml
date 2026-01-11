@@ -1,11 +1,11 @@
-# Python version for Railway/Nixpacks
+# Nixpacks configuration for Railway
 providers = ["python"]
 
 [phases.setup]
-nixPkgs = ["python311"]
+nixPkgs = ["python311", "python311Packages.pip"]
 
 [phases.install]
-cmds = ["cd backend && pip install -r requirements.txt"]
+cmds = ["cd backend && pip3 install -r requirements.txt"]
 
 [start]
-cmd = "cd backend && python api.py"
+cmd = "cd backend && python3 api.py"
