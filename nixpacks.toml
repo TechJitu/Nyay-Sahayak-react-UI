@@ -5,7 +5,7 @@ providers = ["python"]
 nixPkgs = ["python311", "python311Packages.pip"]
 
 [phases.install]
-cmds = ["cd backend && pip3 install -r requirements.txt"]
+cmds = ["cd backend && pip3 install --break-system-packages -r requirements.txt"]
 
 [start]
 cmd = "cd backend && python3 api.py"
