@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 @layer base {
+  /* Dark mode (default) */
   body {
     @apply bg-bg-deep text-slate-200 font-body;
     background-image:
@@ -12,6 +13,33 @@
       linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
   }
+
+  /* Light mode */
+  .light body,
+  body.light,
+  html.light body {
+    @apply bg-gray-50 text-gray-900 font-body;
+    background-image:
+      linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Light mode overrides */
+  .light .bg-bg-deep { background-color: #f9fafb !important; }
+  .light .bg-bg-panel { background-color: rgba(255, 255, 255, 0.95) !important; }
+  .light .bg-black\/40 { background-color: rgba(0, 0, 0, 0.05) !important; }
+  .light .bg-black\/80 { background-color: rgba(255, 255, 255, 0.9) !important; }
+  .light .text-slate-200 { color: #1f2937 !important; }
+  .light .text-slate-300 { color: #374151 !important; }
+  .light .text-slate-400 { color: #4b5563 !important; }
+  .light .text-slate-100 { color: #111827 !important; }
+  .light .border-white\/10 { border-color: rgba(0, 0, 0, 0.1) !important; }
+  .light .border-white\/20 { border-color: rgba(0, 0, 0, 0.15) !important; }
+  .light .bg-white\/5 { background-color: rgba(0, 0, 0, 0.03) !important; }
+  .light .bg-white\/10 { background-color: rgba(0, 0, 0, 0.05) !important; }
+  .light .hover\:bg-white\/10:hover { background-color: rgba(0, 0, 0, 0.08) !important; }
+  .light .glass-panel { background-color: rgba(255, 255, 255, 0.9) !important; border-color: rgba(0, 0, 0, 0.1) !important; }
 }
 
 @layer components {

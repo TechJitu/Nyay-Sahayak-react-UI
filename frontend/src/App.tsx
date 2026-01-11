@@ -38,6 +38,23 @@ function App() {
 
   const [isStreaming, setIsStreaming] = useState(false);
 
+  // Theme State - Load on app start
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark';
+  });
+
+  // Apply theme on load and when changed
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('light');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   // User State
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('nyay_user');
