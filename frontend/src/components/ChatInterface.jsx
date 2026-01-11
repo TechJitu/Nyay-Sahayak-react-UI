@@ -117,6 +117,12 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
 
   const handleVoiceCommand = (command) => {
     console.log('Voice Command Received:', command); // Debug log
+
+    // Stop any ongoing TTS when user starts speaking
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
     switch (command.type) {
       case 'stop': break;
       case 'clear':
@@ -518,8 +524,8 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       )}
 
       {/* Input Area */}
-      <div className="p-3 md:p-4 glass-panel border-t border-white/10 shrink-0">
-        <div className="flex items-end gap-2 max-w-5xl mx-auto">
+      <div className="p-2 md:p-4 glass-panel border-t border-white/10 shrink-0">
+        <div className="flex items-end gap-1.5 md:gap-2 max-w-5xl mx-auto">
           {/* Input Field with Send Button Inside */}
           <div className="flex-1 relative bg-black/40 border border-white/10 focus-within:border-accent-gold rounded-xl transition-all overflow-hidden">
             <textarea
@@ -527,27 +533,47 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
-              placeholder={mode === 'report' ? "Type your complaint..." : "Type your legal query..."}
-              className="w-full bg-transparent border-none rounded-xl py-3 pl-4 pr-12 text-slate-200 placeholder-slate-500 focus:ring-0 resize-none max-h-32 min-h-[48px]"
+              placeholder={mode === 'report' ? "Type complaint..." : "Ask legal question..."}
+              className="w-full bg-transparent border-none rounded-xl py-2.5 md:py-3 pl-3 md:pl-4 pr-10 md:pr-12 text-sm md:text-base text-slate-200 placeholder-slate-500 focus:ring-0 resize-none max-h-32 min-h-[44px] md:min-h-[48px]"
             />
             {/* Send Button Inside Input */}
             <button
               onClick={() => input.trim() && handleSend()}
               disabled={!input.trim()}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg transition-all ${input.trim() ? (mode === 'report' ? 'bg-red-500 hover:bg-red-600' : 'bg-accent-gold hover:bg-yellow-500') : 'bg-white/10'} text-black disabled:text-slate-500`}
+              className={`absolute right-1.5 md:right-2 top-1/2 -translate-y-1/2 p-1.5 md:p-2 rounded-lg transition-all ${input.trim() ? (mode === 'report' ? 'bg-red-500 hover:bg-red-600' : 'bg-accent-gold hover:bg-yellow-500') : 'bg-white/10'} text-black disabled:text-slate-500`}
             >
-              <Send size={18} />
+              <Send size={16} className="md:w-[18px] md:h-[18px]" />
             </button>
           </div>
 
-          {/* Voice Assistant Button */}
+          {/* Voice Controls Group */}
           {voiceAssistantEnabled && voiceAssistant.isSupported && (
-            <VoiceAssistantButton
-              isListening={voiceAssistant.isListening}
-              isProcessing={voiceAssistant.isProcessing}
-              onClick={voiceAssistant.toggleListening}
-              disabled={loading}
-            />
+            <div className="flex items-center gap-1 md:gap-1.5">
+              {/* Mute/Unmute TTS Button */}
+              <button
+                onClick={() => {
+                  if (!isMuted && window.speechSynthesis) {
+                    window.speechSynthesis.cancel();
+                  }
+                  setIsMuted(!isMuted);
+                }}
+                className={`p-2 md:p-2.5 rounded-full transition-all ${isMuted
+                    ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                    : 'bg-white/5 text-slate-400 hover:bg-white/10 border border-white/10'
+                  }`}
+                title={isMuted ? 'Unmute AI Voice' : 'Mute AI Voice'}
+              >
+                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              </button>
+
+              {/* Voice Assistant Button */}
+              <VoiceAssistantButton
+                isListening={voiceAssistant.isListening}
+                isProcessing={voiceAssistant.isProcessing}
+                onClick={voiceAssistant.toggleListening}
+                disabled={loading}
+              />
+            </div>
           )}
         </div>
       </div>
