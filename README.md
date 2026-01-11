@@ -8,7 +8,7 @@
 
 ## Live Demo
 
-- **Frontend**: [https://nyay-sahayak.vercel.app](https://nyay-sahayak.vercel.app)
+- **Frontend**: [https://nyay-sahayak-gray.vercel.app](https://nyay-sahayak-gray.vercel.app)
 - **Backend API**: [https://nyay-sahayak-api-production.up.railway.app](https://nyay-sahayak-api-production.up.railway.app/docs)
 
 ## Features
