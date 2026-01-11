@@ -314,7 +314,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
       formData.append("file", audioFile);
       formData.append("history", reportHistory);
       try {
-        const response = await fetch("http://127.0.0.1:8000/voice-message", {
+        const response = await fetch(`${API_BASE_URL}/voice-message`, {
           method: "POST",
           body: formData,
         });

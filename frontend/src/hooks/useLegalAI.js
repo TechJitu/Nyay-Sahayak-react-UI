@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import API_BASE_URL from '../config/api';
 
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = API_BASE_URL;
 
 export const useLegalAI = () => {
   const [loading, setLoading] = useState(false);
