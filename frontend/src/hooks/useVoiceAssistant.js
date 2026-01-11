@@ -91,43 +91,45 @@ export const useVoiceAssistant = (enabled = true, onCommand) => {
     const handleFinalTranscript = useCallback((text) => {
         const lowerText = text.toLowerCase();
 
-        // Wake word detection with multiple variations
-        if (isWaitingForWakeWord.current) {
-            const wakeWords = [
-                'hey sahayak', 'hi sahayak', 'hello sahayak',
-                'okay sahayak', 'ok sahayak', 'sahayak',
-                'hey saahaayak', 'hi saahaayak', 'hello saahaayak'
-            ];
+        // Wake word variations - check on EVERY query
+        const wakeWords = [
+            'hey sahayak', 'hi sahayak', 'hello sahayak',
+            'okay sahayak', 'ok sahayak', 'sahayak',
+            'hey saahaayak', 'hi saahaayak', 'hello saahaayak',
+            'hey sahaya', 'he sahayak', 'hey sahaayak', 'a sahayak'
+        ];
 
-            const foundWakeWord = wakeWords.find(word => lowerText.includes(word));
+        // Check if wake word is present
+        const foundWakeWord = wakeWords.find(word => lowerText.includes(word));
 
-            if (foundWakeWord) {
-                // Wake word detected!
-                console.log('Wake word detected:', foundWakeWord);
-                isWaitingForWakeWord.current = false;
-                setIsProcessing(true);
-
-                // Extract command after wake word
-                let command = text;
-                wakeWords.forEach(word => {
-                    command = command.replace(new RegExp(word, 'gi'), '').trim();
-                });
-
-                if (command && command.length > 2) {
-                    console.log('Immediate command:', command);
-                    processCommand(command);
-                } else {
-                    // Just activated, wait for next speech
-                    setIsProcessing(false);
-                    setTranscript('I\'m listening...');
-                }
-            }
+        // If waiting for wake word and no wake word found, ignore
+        if (isWaitingForWakeWord.current && !foundWakeWord) {
+            console.log('Waiting for wake word, ignoring:', text);
             return;
         }
 
-        // Process command when already activated
+        // Extract command after wake word (if present)
+        let command = text;
+        if (foundWakeWord) {
+            console.log('Wake word detected:', foundWakeWord);
+            isWaitingForWakeWord.current = false;
+            // Remove wake word from command
+            wakeWords.forEach(word => {
+                command = command.replace(new RegExp(word, 'gi'), '').trim();
+            });
+        }
+
+        // If only wake word was said (no actual command), just activate
+        if (!command || command.length < 2) {
+            console.log('Just wake word, waiting for command...');
+            setIsProcessing(false);
+            setTranscript('I\'m listening...');
+            return;
+        }
+
+        // Process the command
         setIsProcessing(true);
-        processCommand(text);
+        processCommand(command);
     }, []);
 
     // Process voice commands
