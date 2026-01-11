@@ -285,6 +285,7 @@ function App() {
                       role={user.role}
                       user={user}
                       onNyayPatra={handleNyayPatra}
+                      onDocGen={() => { }}
                       mode={mode}
                       voiceAssistantEnabled={user.voiceAssistantEnabled}
                     />
