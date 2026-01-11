@@ -180,25 +180,54 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     // Cancel any ongoing speech
     window.speechSynthesis.cancel();
 
+    // Clean markdown formatting before speaking
+    const cleanText = (rawText) => {
+      return rawText
+        .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove **bold**
+        .replace(/\*([^*]+)\*/g, '$1')     // Remove *italic*
+        .replace(/#{1,6}\s*/g, '')         // Remove # headings
+        .replace(/`([^`]+)`/g, '$1')       // Remove `code`
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove [link](url)
+        .replace(/^\s*[-*+]\s+/gm, '')     // Remove bullet points
+        .replace(/^\s*\d+\.\s+/gm, '')     // Remove numbered lists
+        .replace(/---+/g, '')              // Remove horizontal rules
+        .replace(/\n\n+/g, '. ')           // Convert multiple newlines to pause
+        .replace(/\n/g, ' ')               // Convert single newlines to space
+        .trim();
+    };
+
+    const cleanedText = cleanText(text);
+    console.log('Speaking cleaned text:', cleanedText.substring(0, 100) + '...');
+
     const speak = () => {
-      const utterance = new SpeechSynthesisUtterance(text);
+      const utterance = new SpeechSynthesisUtterance(cleanedText);
       const voices = window.speechSynthesis.getVoices();
 
       console.log('Available voices:', voices.length);
 
       let selectedVoice = null;
 
-      // Prioritize Indian voices
-      if (voices.length > 0) {
-        // Try to find Indian English voice first
-        selectedVoice = voices.find(v => v.lang === 'en-IN');
+      // Get user's language preference from settings
+      const userLanguage = user?.language || 'Hinglish';
 
-        // Then try Hindi
-        if (!selectedVoice) {
+      if (voices.length > 0) {
+        // Language-based voice selection
+        if (userLanguage === 'Hindi') {
+          // Prefer Hindi voice
           selectedVoice = voices.find(v => v.lang === 'hi-IN');
+          if (!selectedVoice) selectedVoice = voices.find(v => v.lang.startsWith('hi'));
+        } else if (userLanguage === 'English') {
+          // Prefer Indian English voice  
+          selectedVoice = voices.find(v => v.lang === 'en-IN');
+          if (!selectedVoice) selectedVoice = voices.find(v => v.lang === 'en-US');
+          if (!selectedVoice) selectedVoice = voices.find(v => v.lang.startsWith('en'));
+        } else {
+          // Hinglish - try Indian English first, then Hindi
+          selectedVoice = voices.find(v => v.lang === 'en-IN');
+          if (!selectedVoice) selectedVoice = voices.find(v => v.lang === 'hi-IN');
         }
 
-        // Then try any voice with India in name
+        // Fallback to any Indian voice
         if (!selectedVoice) {
           selectedVoice = voices.find(v =>
             v.name.toLowerCase().includes('india') ||
@@ -207,7 +236,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
           );
         }
 
-        // Fallback to first voice
+        // Final fallback to first voice
         if (!selectedVoice) {
           selectedVoice = voices[0];
         }
