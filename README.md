@@ -6,9 +6,14 @@
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Web-orange)
 
+## Live Demo
+
+- **Frontend**: [https://nyay-sahayak.vercel.app](https://nyay-sahayak.vercel.app)
+- **Backend API**: [https://nyay-sahayak-api-production.up.railway.app](https://nyay-sahayak-api-production.up.railway.app/docs)
+
 ## Features
 
-- **AI Legal Assistant** - Get instant legal advice powered by Llama 3.3
+- **AI Legal Assistant** - Get instant legal advice powered by Groq (Llama 3.3)
 - **Voice Assistant** - Speak in Hindi/English/Hinglish, get responses in the same language
 - **Document Generation** - Generate legal notices, rent agreements, and more
 - **Google Authentication** - Secure login with Firebase
@@ -21,16 +26,16 @@
 ### Frontend
 - React 18 + Vite
 - TailwindCSS
-- Firebase (Auth & Firestore)
-- Lucide React Icons
+- Firebase (Auth and Firestore)
+- Deployed on **Vercel**
 
 ### Backend
 - FastAPI (Python)
 - Groq AI (Llama 3.3 70B)
 - ChromaDB (Vector Database)
-- Whisper (Voice Transcription)
+- Deployed on **Railway**
 
-## Quick Start
+## Quick Start (Local Development)
 
 ### Prerequisites
 - Node.js 18+ 
@@ -87,33 +92,34 @@ npm run dev
 
 The app will be available at `http://localhost:5173`
 
-## Configuration
+## Deployment
 
-### Environment Variables
+### Backend - Railway (Free)
 
-#### Backend (`/backend`)
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GROQ_API_KEY` | Your Groq API key for AI models | Yes |
+1. Go to [railway.app](https://railway.app) and sign in with GitHub
+2. Click **New Project** > **Deploy from GitHub repo**
+3. Select this repository
+4. In Settings, set **Root Directory** to `/` (leave empty)
+5. Add Environment Variable:
+   - `GROQ_API_KEY` = your_groq_api_key
+6. Deploy! Copy your Railway URL.
 
-#### Frontend (`/frontend`)
-Firebase configuration is in `src/firebase.js`. To use your own Firebase project:
+### Frontend - Vercel (Free)
 
-1. Create a project at [Firebase Console](https://console.firebase.google.com/)
-2. Enable Authentication (Google provider)
-3. Enable Firestore Database
-4. Copy your config to `src/firebase.js`
+1. Go to [vercel.com](https://vercel.com) and sign in with GitHub
+2. Click **Add New** > **Project** > Select this repository
+3. Configure:
+   - **Root Directory**: `frontend`
+   - **Framework Preset**: Vite
+4. Add Environment Variable:
+   - `VITE_API_URL` = `https://your-railway-url.up.railway.app`
+5. Deploy!
 
-```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
-};
-```
+### Firebase Setup
+
+Add your Vercel domain to Firebase authorized domains:
+1. Go to Firebase Console > Authentication > Settings
+2. Add your Vercel URL to **Authorized domains**
 
 ## Project Structure
 
@@ -122,6 +128,7 @@ Nyay-Sahayak-react-UI/
 ├── backend/
 │   ├── api.py              # FastAPI backend
 │   ├── requirements.txt    # Python dependencies
+│   ├── Dockerfile          # Docker config for Railway
 │   └── nyay_memory/        # ChromaDB storage
 │
 ├── frontend/
@@ -129,13 +136,28 @@ Nyay-Sahayak-react-UI/
 │   │   ├── components/     # React components
 │   │   ├── hooks/          # Custom hooks
 │   │   ├── pages/          # Page components
+│   │   ├── config/         # API configuration
 │   │   ├── firebase.js     # Firebase config
 │   │   └── App.tsx         # Main app
-│   ├── package.json
-│   └── index.html
+│   ├── vercel.json         # Vercel routing config
+│   └── package.json
 │
+├── Dockerfile              # Main Docker config
+├── railway.json            # Railway config
 └── README.md
 ```
+
+## Environment Variables
+
+### Backend (Railway)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `GROQ_API_KEY` | Your Groq API key | Yes |
+
+### Frontend (Vercel)
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_API_URL` | Railway backend URL | Yes |
 
 ## Voice Assistant Usage
 
@@ -144,71 +166,17 @@ Nyay-Sahayak-react-UI/
 3. AI responds in the **same language** you spoke
 4. Click the speaker icon to hear the response
 
-## Deploy to Render (Free)
-
-### Step 1: Push to GitHub
-```bash
-git add .
-git commit -m "Ready for deployment"
-git push origin main
-```
-
-### Step 2: Deploy Backend (API)
-
-1. Go to [Render Dashboard](https://dashboard.render.com/)
-2. Click **New** > **Web Service**
-3. Connect your GitHub repo
-4. Configure:
-   - **Name**: `nyay-sahayak-api`
-   - **Root Directory**: `backend`
-   - **Runtime**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn api:app --host 0.0.0.0 --port $PORT`
-5. Add Environment Variable:
-   - Key: `GROQ_API_KEY`
-   - Value: `your_groq_api_key`
-6. Click **Create Web Service**
-7. Copy your backend URL (e.g., `https://nyay-sahayak-api.onrender.com`)
-
-### Step 3: Deploy Frontend
-
-1. Click **New** > **Static Site**
-2. Connect same GitHub repo
-3. Configure:
-   - **Name**: `nyay-sahayak`
-   - **Root Directory**: `frontend`
-   - **Build Command**: `npm install && npm run build`
-   - **Publish Directory**: `dist`
-4. Add Environment Variable:
-   - Key: `VITE_API_URL`
-   - Value: `https://nyay-sahayak-api.onrender.com` (your backend URL)
-5. Click **Create Static Site**
-
-### Step 4: Update Firebase
-
-Add your Render frontend URL to Firebase authorized domains:
-1. Go to Firebase Console > Authentication > Settings
-2. Add your Render URL to **Authorized domains**
-
 ## Security Notes
 
-- **Never commit API keys** to version control
+- Never commit API keys to version control
 - GROQ API key is loaded from environment variables
 - Firebase API keys are safe to expose (restricted by domain rules)
 - All user data is stored securely in Firebase
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## Developers
 
-- **@zubershk** - Lead Developer
-- **@techJitu** - Backend Developer
+- **@TechJitu** - Lead Developer
+- **@zubershk** - Backend Developer
 
 ## License
 
@@ -218,7 +186,8 @@ This project is licensed under the MIT License.
 
 - [Groq](https://groq.com/) - For blazing fast AI inference
 - [Firebase](https://firebase.google.com/) - For authentication and database
-- [LangChain](https://langchain.com/) - For AI chain orchestration
+- [Railway](https://railway.app/) - For backend hosting
+- [Vercel](https://vercel.com/) - For frontend hosting
 
 ---
 
