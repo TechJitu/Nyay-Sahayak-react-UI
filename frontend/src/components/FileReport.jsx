@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import API_BASE_URL from "../config/api";
 
 const FileReport = () => {
   const [input, setInput] = useState("");
@@ -18,7 +19,7 @@ const FileReport = () => {
 
     try {
       // 2. Backend ko bhejo (User input + Purani History)
-      const response = await fetch("http://127.0.0.1:8000/file-report-interview", {
+      const response = await fetch(`${API_BASE_URL}/file-report-interview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -31,7 +32,7 @@ const FileReport = () => {
 
       // 3. AI ka jawab screen pe dikhao
       setMessages([...newMessages, { sender: "ai", text: data.answer }]);
-      
+
       // 4. History update karo (User Input + AI Response add karke)
       const newHistory = `${history}\nUser: ${input}\nAI: ${data.answer}`;
       setHistory(newHistory);
@@ -40,7 +41,7 @@ const FileReport = () => {
       console.error("Error:", error);
       setMessages([...newMessages, { sender: "ai", text: "Sorry, connection error. Try again." }]);
     }
-    
+
     setLoading(false);
     setInput(""); // Input box khali karo
   };
@@ -48,15 +49,15 @@ const FileReport = () => {
   return (
     <div style={{ maxWidth: "600px", margin: "20px auto", border: "1px solid #ccc", padding: "20px", borderRadius: "10px" }}>
       <h2>👮 File FIR (Interactive Mode)</h2>
-      
+
       {/* Chat Area */}
       <div style={{ height: "400px", overflowY: "scroll", marginBottom: "20px", background: "#f9f9f9", padding: "10px" }}>
         {messages.map((msg, index) => (
           <div key={index} style={{ textAlign: msg.sender === "user" ? "right" : "left", margin: "10px 0" }}>
-            <span style={{ 
-              background: msg.sender === "user" ? "#007bff" : "#e0e0e0", 
+            <span style={{
+              background: msg.sender === "user" ? "#007bff" : "#e0e0e0",
               color: msg.sender === "user" ? "#fff" : "#000",
-              padding: "8px 15px", 
+              padding: "8px 15px",
               borderRadius: "15px",
               display: "inline-block",
               maxWidth: "80%"
@@ -65,13 +66,13 @@ const FileReport = () => {
             </span>
           </div>
         ))}
-        {loading && <p style={{fontStyle:"italic"}}>Officer likh rahe hain...</p>}
+        {loading && <p style={{ fontStyle: "italic" }}>Officer likh rahe hain...</p>}
       </div>
 
       {/* Input Area */}
       <div style={{ display: "flex", gap: "10px" }}>
-        <input 
-          type="text" 
+        <input
+          type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Yahan type karein..."

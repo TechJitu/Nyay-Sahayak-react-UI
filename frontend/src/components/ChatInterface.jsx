@@ -3,6 +3,7 @@ import { Send, Mic, Volume2, VolumeX, User, Trash2, Copy, Check } from 'lucide-r
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 import VoiceAssistantButton from './VoiceAssistantButton';
 import VoiceWaveform from './VoiceWaveform';
+import API_BASE_URL from '../config/api';
 
 const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, user, onNyayPatra, onDocGen, mode, voiceAssistantEnabled = true }) => {
   const [input, setInput] = useState('');
@@ -348,7 +349,7 @@ const ChatInterface = ({ messages, setMessages, onSendMessage, loading, role, us
     setMessages(prev => [...prev, { sender: 'user', text: textToSend }]);
     if (mode === 'report') {
       try {
-        const response = await fetch("http://127.0.0.1:8000/file-report-interview", {
+        const response = await fetch(`${API_BASE_URL}/file-report-interview`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ user_input: textToSend, history: reportHistory }),
