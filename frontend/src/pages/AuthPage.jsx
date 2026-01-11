@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { auth } from '../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth';
 
 const AuthPage = ({ handleGoogleLogin }) => {
     const navigate = useNavigate();
     const [isLogin, setIsLogin] = useState(true);
     const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -18,16 +22,74 @@ const AuthPage = ({ handleGoogleLogin }) => {
             ...formData,
             [e.target.name]: e.target.value
         });
+        setError(''); // Clear error on input change
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!isLogin && formData.password !== formData.confirmPassword) {
-            alert('Passwords do not match!');
-            return;
+        setError('');
+        setLoading(true);
+
+        try {
+            if (isLogin) {
+                // Login with email/password
+                await signInWithEmailAndPassword(auth, formData.email, formData.password);
+                navigate('/app');
+            } else {
+                // Sign up with email/password
+                if (formData.password !== formData.confirmPassword) {
+                    setError('Passwords do not match!');
+                    setLoading(false);
+                    return;
+                }
+
+                if (formData.password.length < 6) {
+                    setError('Password must be at least 6 characters');
+                    setLoading(false);
+                    return;
+                }
+
+                const userCredential = await createUserWithEmailAndPassword(
+                    auth,
+                    formData.email,
+                    formData.password
+                );
+
+                // Update profile with name
+                await updateProfile(userCredential.user, {
+                    displayName: formData.name
+                });
+
+                navigate('/app');
+            }
+        } catch (err) {
+            console.error('Auth error:', err);
+            // User-friendly error messages
+            switch (err.code) {
+                case 'auth/email-already-in-use':
+                    setError('This email is already registered. Try logging in.');
+                    break;
+                case 'auth/invalid-email':
+                    setError('Invalid email address.');
+                    break;
+                case 'auth/weak-password':
+                    setError('Password is too weak. Use at least 6 characters.');
+                    break;
+                case 'auth/user-not-found':
+                    setError('No account found with this email.');
+                    break;
+                case 'auth/wrong-password':
+                    setError('Incorrect password.');
+                    break;
+                case 'auth/invalid-credential':
+                    setError('Invalid email or password.');
+                    break;
+                default:
+                    setError(err.message || 'An error occurred. Please try again.');
+            }
+        } finally {
+            setLoading(false);
         }
-        // Handle email/password authentication here
-        console.log('Form submitted:', formData);
     };
 
     return (
@@ -66,7 +128,7 @@ const AuthPage = ({ handleGoogleLogin }) => {
                     {/* Tabs */}
                     <div className="flex gap-2 mb-8 bg-gray-100 dark:bg-gray-800/50 p-1 rounded-lg">
                         <button
-                            onClick={() => setIsLogin(true)}
+                            onClick={() => { setIsLogin(true); setError(''); }}
                             className={`flex-1 py-2.5 rounded-md font-semibold transition-all ${isLogin
                                 ? 'bg-primary text-black shadow-md'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -75,7 +137,7 @@ const AuthPage = ({ handleGoogleLogin }) => {
                             Login
                         </button>
                         <button
-                            onClick={() => setIsLogin(false)}
+                            onClick={() => { setIsLogin(false); setError(''); }}
                             className={`flex-1 py-2.5 rounded-md font-semibold transition-all ${!isLogin
                                 ? 'bg-primary text-black shadow-md'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -84,6 +146,13 @@ const AuthPage = ({ handleGoogleLogin }) => {
                             Sign Up
                         </button>
                     </div>
+
+                    {/* Error Message */}
+                    {error && (
+                        <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300 text-sm">
+                            {error}
+                        </div>
+                    )}
 
                     {/* Google Sign In */}
                     <button
@@ -207,9 +276,20 @@ const AuthPage = ({ handleGoogleLogin }) => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full bg-primary hover:bg-yellow-400 text-black font-bold py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg"
+                            disabled={loading}
+                            className="w-full bg-primary hover:bg-yellow-400 text-black font-bold py-3 rounded-lg transition-all transform hover:scale-[1.02] active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                         >
-                            {isLogin ? 'Sign In' : 'Create Account'}
+                            {loading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    Processing...
+                                </span>
+                            ) : (
+                                isLogin ? 'Sign In' : 'Create Account'
+                            )}
                         </button>
                     </form>
 
