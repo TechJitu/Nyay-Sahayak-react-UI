@@ -175,8 +175,8 @@ Nyay-Sahayak-react-UI/
 
 ## Developers
 
-- **@TechJitu** - Lead Developer
-- **@zubershk** - Backend Developer
+- **[@zubershk](https://github.com/zubershk)** – Developer  
+- **[@TechJitu](https://github.com/TechJitu)** – Developer
 
 ## License
 
